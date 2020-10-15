@@ -13,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tv_result;     //닉네임 text
     private ImageView iv_profile;       //이미지 뷰
-    private  TextView temp;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
