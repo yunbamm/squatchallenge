@@ -13,7 +13,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tv_result;     //닉네임 text
     private ImageView iv_profile;       //이미지 뷰
-
+    private  TextView temp;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         //프로필 사진 가져올때 glide가 쓰인다
         iv_profile = findViewById(R.id.iv_profile);
         Glide.with(this).load(photoUrl).into(iv_profile);       //프로필 url을 이미지뷰에 세팅
-
 
     }
 }
