@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "286030725946",
+    "firebase_url": "https://squat-challenge-db722.firebaseio.com",
+    "project_id": "squat-challenge-db722",
+    "storage_bucket": "squat-challenge-db722.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286030725946:android:558c534e564d43081a0603",
+        "android_client_info": {
+          "package_name": "com.example.squatchallenge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "286030725946-ll8mutcipmtse77e7ftabmh5k5n7vvjl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.squatchallenge",
+            "certificate_hash": "4cca8cd30e149232c4760824879d14ca4db2431f"
+          }
+        },
+        {
+          "client_id": "286030725946-156cj4va82ch5kmg17la8327a0of6f49.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBF383SO1NYQCCQ_lU6hpqVqDiwCjt1q3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "286030725946-156cj4va82ch5kmg17la8327a0of6f49.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
