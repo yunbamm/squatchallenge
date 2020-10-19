@@ -13,6 +13,7 @@ android {
         versionName "1.0"
 
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,7 +41,9 @@ dependencies {
     implementation 'androidx.gridlayout:gridlayout:1.0.0'//글라이드 이미지 로딩
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'      //글라이드 이미지 로딩
 
-
+    implementation 'com.google.firebase:firebase-firestore:21.2.1'
+    implementation 'com.google.firebase:firebase-database:19.4.0'
+    implementation 'com.android.support:multidex:1.0.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
