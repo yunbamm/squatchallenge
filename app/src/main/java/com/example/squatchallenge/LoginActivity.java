@@ -35,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
@@ -47,7 +48,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     //----------------------------test----------------------------------
     private String userEmail;
     private String userName;
-    DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+    DatabaseReference DB;
+
     //-------------------------------------------------------------------
 
 
@@ -83,11 +85,44 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     //---------------------------------------------------------------
     //함수부분
-    private void writeNewUser(String userEmail , String username) {
+    //DB내의 중복아이디 검사
+    public void check(final String userEmail , final String username) {
+        DB = FirebaseDatabase.getInstance().getReference("users");         //완탐을 위해
+        DB.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean exist = false;
+
+                Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
+
+                while (child.hasNext()) {
+                    //존재할때
+                    if (child.next().getKey().equals(userEmail)) {
+                        exist = true;
+                        Toast.makeText(LoginActivity.this , "이미 존재하는 아이디 ",Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                }
+
+                if(!exist){
+                    Toast.makeText(LoginActivity.this , "새로 추가하는 아이디 ",Toast.LENGTH_SHORT).show();
+                    writeNewUser(userEmail , username);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    //새로운 사용자 등록
+    void writeNewUser(final String userEmail , String username) {
+        DB = FirebaseDatabase.getInstance().getReference();        //mDatabase가 root라고 생각
         User user = new User(username);
-        mDatabase.child("users").child(userEmail).setValue(user);
+        DB.child("users").child(userEmail).setValue(user);           //객체 user
     }
 
+    //이메일 @앞까지 파싱
     private String parsingEmail(String userEmail){
         String tmpEmail = "";
         for(int i=0;i<userEmail.length();i++){
@@ -96,6 +131,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
         return tmpEmail;
     }
+
+
+
     //---------------------------------------------------------------
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {       //구글 로그인 인증을 요청했을때  값을 되돌려 받는곳
@@ -119,7 +157,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){    //로그인이 성공했으면
-                            Toast.makeText(LoginActivity.this , "로그인 성공",Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(LoginActivity.this , "로그인 성공",Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             intent.putExtra("name" , account.getDisplayName());         //key값 :Nickname
                             intent.putExtra("photoUrl",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환
@@ -128,7 +166,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             userEmail = account.getEmail();
                             userName = account.getDisplayName();
                             userEmail = parsingEmail(userEmail);
-                            writeNewUser(userEmail , userName);
+
+
+                            //userEmail이 DB에 존재하는 email인지 확인
+
+                            check(userEmail , userName);
                             //--------------------------------------------------------
                             startActivity(intent);
                         }
