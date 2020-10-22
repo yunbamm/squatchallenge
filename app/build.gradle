@@ -38,7 +38,8 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:4.2.1'              //파이어베이스 인증
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.gridlayout:gridlayout:1.0.0'//글라이드 이미지 로딩
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
+    implementation 'com.google.android.material:material:1.2.1'//글라이드 이미지 로딩
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'      //글라이드 이미지 로딩
 
     implementation 'com.google.firebase:firebase-firestore:21.2.1'

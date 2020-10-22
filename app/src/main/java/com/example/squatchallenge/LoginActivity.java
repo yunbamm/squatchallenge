@@ -80,7 +80,6 @@ import java.util.Map;
                 startActivityForResult(intent , REQ_SIGN_GOOGLE);           //?
             }
         });
-
     }
 
     //---------------------------------------------------------------
@@ -130,8 +129,6 @@ import java.util.Map;
         return tmpEmail;
     }
 
-
-
     //---------------------------------------------------------------
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {       //구글 로그인 인증을 요청했을때  값을 되돌려 받는곳
@@ -143,7 +140,6 @@ import java.util.Map;
             if(result.isSuccess()){     //인증 결과가 성공적이면
                 GoogleSignInAccount account = result.getSignInAccount();        //account는 구글 로그인 정보를 담고있다(닉네임,프사,이메일주소..)
                 resultLogin(account);       //로그인 결과값 출력 수행하라는 메소드
-
             }
         }
     }
@@ -165,9 +161,7 @@ import java.util.Map;
                             userName = account.getDisplayName();
                             userEmail = parsingEmail(userEmail);
 
-
                             //userEmail이 DB에 존재하는 email인지 확인
-
                             check(userEmail , userName);
                             //--------------------------------------------------------
                             startActivity(intent);
