@@ -38,23 +38,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+    public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    private SignInButton btn_google;        //구글 로그인 버튼
-    private FirebaseAuth auth;              //파이어베이스 인증 객체
-    private GoogleApiClient googleApiClient;    //구글 api 클라이언트 객체
-    private static final int REQ_SIGN_GOOGLE = 100;     //구글 로그인 결과 코드
+        private SignInButton btn_google;        //구글 로그인 버튼
+        private FirebaseAuth auth;              //파이어베이스 인증 객체
+        private GoogleApiClient googleApiClient;    //구글 api 클라이언트 객체
+        private static final int REQ_SIGN_GOOGLE = 100;     //구글 로그인 결과 코드
 
-    //----------------------------test----------------------------------
-    private String userEmail;
-    private String userName;
-    DatabaseReference DB;
+        //----------------------------test----------------------------------
+        private String userEmail;
+        private String userName;
+        DatabaseReference DB;
 
-    //-------------------------------------------------------------------
+        //-------------------------------------------------------------------
 
 
 
-    @Override
+        @Override
     protected void onCreate(Bundle savedInstanceState) {        //앱이 실행될때 처음 수행
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
@@ -99,13 +99,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     //존재할때
                     if (child.next().getKey().equals(userEmail)) {
                         exist = true;
-                        Toast.makeText(LoginActivity.this , "이미 존재하는 아이디 ",Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
 
                 if(!exist){
-                    Toast.makeText(LoginActivity.this , "새로 추가하는 아이디 ",Toast.LENGTH_SHORT).show();
                     writeNewUser(userEmail , username);
                 }
             }
@@ -157,7 +155,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){    //로그인이 성공했으면
-                            //Toast.makeText(LoginActivity.this , "로그인 성공",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this , "로그인 성공",Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             intent.putExtra("name" , account.getDisplayName());         //key값 :Nickname
                             intent.putExtra("photoUrl",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환
