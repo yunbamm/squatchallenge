@@ -1,0 +1,110 @@
+Index: app/src/main/java/com/example/squatchallenge/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.squatchallenge;\r\n\r\npublic class User {\r\n    public String username;\r\n\r\n    public User(){}\r\n\r\n    public User(String username){\r\n        this.username = username;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/User.java	(revision 177c2881f9f4f7c9b4e12d644ac9437d83797eb3)
++++ app/src/main/java/com/example/squatchallenge/User.java	(date 1603286308156)
+@@ -8,4 +8,4 @@
+     public User(String username){
+         this.username = username;
+     }
+-}
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/squatchallenge/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.squatchallenge;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.os.ResultReceiver;\r\nimport android.util.Log;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.Toast;\r\n\r\nimport com.google.android.gms.auth.api.Auth;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignIn;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInAccount;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInOptions;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInResult;\r\nimport com.google.android.gms.common.ConnectionResult;\r\nimport com.google.android.gms.common.SignInButton;\r\nimport com.google.android.gms.common.api.GoogleApiClient;\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.auth.AuthCredential;\r\nimport com.google.firebase.auth.AuthResult;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\nimport com.google.firebase.auth.GoogleAuthProvider;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\nimport com.google.firebase.firestore.FirebaseFirestore;\r\n\r\nimport java.util.HashMap;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\n\r\npublic class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {\r\n\r\n    private SignInButton btn_google;        //구글 로그인 버튼\r\n    private FirebaseAuth auth;              //파이어베이스 인증 객체\r\n    private GoogleApiClient googleApiClient;    //구글 api 클라이언트 객체\r\n    private static final int REQ_SIGN_GOOGLE = 100;     //구글 로그인 결과 코드\r\n\r\n    //----------------------------test----------------------------------\r\n    private String userEmail;\r\n    private String userName;\r\n    DatabaseReference DB;\r\n\r\n    //-------------------------------------------------------------------\r\n\r\n\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {        //앱이 실행될때 처음 수행\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login);\r\n\r\n        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)\r\n                .requestIdToken(getString(R.string.default_web_client_id))\r\n                .requestEmail()\r\n                .build();\r\n\r\n        googleApiClient = new GoogleApiClient.Builder(this)\r\n                .enableAutoManage(this,this)\r\n                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)\r\n                .build();\r\n\r\n        auth = FirebaseAuth.getInstance();      //파이어베이스 인증객체 초기화\r\n\r\n        btn_google=findViewById(R.id.btn_google);\r\n        btn_google.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행\r\n            @Override\r\n            public void onClick(View view) {\r\n\r\n                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);      //구글에서 제공하는 인증화면\r\n                startActivityForResult(intent , REQ_SIGN_GOOGLE);           //?\r\n            }\r\n        });\r\n\r\n    }\r\n\r\n    //---------------------------------------------------------------\r\n    //함수부분\r\n    //DB내의 중복아이디 검사\r\n    public void check(final String userEmail , final String username) {\r\n        DB = FirebaseDatabase.getInstance().getReference(\"users\");         //완탐을 위해\r\n        DB.addListenerForSingleValueEvent(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                boolean exist = false;\r\n\r\n                Iterator<DataSnapshot> child = snapshot.getChildren().iterator();\r\n\r\n                while (child.hasNext()) {\r\n                    //존재할때\r\n                    if (child.next().getKey().equals(userEmail)) {\r\n                        exist = true;\r\n                        Toast.makeText(LoginActivity.this , \"이미 존재하는 아이디 \",Toast.LENGTH_SHORT).show();\r\n                        break;\r\n                    }\r\n                }\r\n\r\n                if(!exist){\r\n                    Toast.makeText(LoginActivity.this , \"새로 추가하는 아이디 \",Toast.LENGTH_SHORT).show();\r\n                    writeNewUser(userEmail , username);\r\n                }\r\n            }\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n    }\r\n    //새로운 사용자 등록\r\n    void writeNewUser(final String userEmail , String username) {\r\n        DB = FirebaseDatabase.getInstance().getReference();        //mDatabase가 root라고 생각\r\n        User user = new User(username);\r\n        DB.child(\"users\").child(userEmail).setValue(user);           //객체 user\r\n    }\r\n\r\n    //이메일 @앞까지 파싱\r\n    private String parsingEmail(String userEmail){\r\n        String tmpEmail = \"\";\r\n        for(int i=0;i<userEmail.length();i++){\r\n            if(userEmail.charAt(i) == '@') break;\r\n            tmpEmail+=userEmail.charAt(i);\r\n        }\r\n        return tmpEmail;\r\n    }\r\n\r\n\r\n\r\n    //---------------------------------------------------------------\r\n    @Override\r\n    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {       //구글 로그인 인증을 요청했을때  값을 되돌려 받는곳\r\n        super.onActivityResult(requestCode, resultCode, data);\r\n\r\n        if(requestCode == REQ_SIGN_GOOGLE){\r\n            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);\r\n\r\n            if(result.isSuccess()){     //인증 결과가 성공적이면\r\n                GoogleSignInAccount account = result.getSignInAccount();        //account는 구글 로그인 정보를 담고있다(닉네임,프사,이메일주소..)\r\n                resultLogin(account);       //로그인 결과값 출력 수행하라는 메소드\r\n\r\n            }\r\n        }\r\n    }\r\n\r\n    private void resultLogin(final GoogleSignInAccount account) {\r\n        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(),null);\r\n        auth.signInWithCredential(credential)\r\n                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {\r\n                    @Override\r\n                    public void onComplete(@NonNull Task<AuthResult> task) {\r\n                        if(task.isSuccessful()){    //로그인이 성공했으면\r\n                            //Toast.makeText(LoginActivity.this , \"로그인 성공\",Toast.LENGTH_SHORT).show();\r\n                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);\r\n                            intent.putExtra(\"name\" , account.getDisplayName());         //key값 :Nickname\r\n                            intent.putExtra(\"photoUrl\",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환\r\n\r\n                            //----------------------------userid와 username을 가져온다\r\n                            userEmail = account.getEmail();\r\n                            userName = account.getDisplayName();\r\n                            userEmail = parsingEmail(userEmail);\r\n\r\n\r\n                            //userEmail이 DB에 존재하는 email인지 확인\r\n\r\n                            check(userEmail , userName);\r\n                            //--------------------------------------------------------\r\n                            startActivity(intent);\r\n                        }\r\n                        else{       //로그인 실패했으면\r\n                            Toast.makeText(LoginActivity.this , \"로그인 실패\",Toast.LENGTH_SHORT).show();\r\n                        }\r\n                    }\r\n                });\r\n    }\r\n\r\n    @Override\r\n    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {\r\n\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/LoginActivity.java	(revision 177c2881f9f4f7c9b4e12d644ac9437d83797eb3)
++++ app/src/main/java/com/example/squatchallenge/LoginActivity.java	(date 1603342302202)
+@@ -52,8 +52,6 @@
+ 
+     //-------------------------------------------------------------------
+ 
+-
+-
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {        //앱이 실행될때 처음 수행
+         super.onCreate(savedInstanceState);
+@@ -132,8 +130,6 @@
+         return tmpEmail;
+     }
+ 
+-
+-
+     //---------------------------------------------------------------
+     @Override
+     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {       //구글 로그인 인증을 요청했을때  값을 되돌려 받는곳
+@@ -145,7 +141,6 @@
+             if(result.isSuccess()){     //인증 결과가 성공적이면
+                 GoogleSignInAccount account = result.getSignInAccount();        //account는 구글 로그인 정보를 담고있다(닉네임,프사,이메일주소..)
+                 resultLogin(account);       //로그인 결과값 출력 수행하라는 메소드
+-
+             }
+         }
+     }
+@@ -167,9 +162,7 @@
+                             userName = account.getDisplayName();
+                             userEmail = parsingEmail(userEmail);
+ 
+-
+                             //userEmail이 DB에 존재하는 email인지 확인
+-
+                             check(userEmail , userName);
+                             //--------------------------------------------------------
+                             startActivity(intent);
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/compiler.xml	(date 1603285947288)
++++ .idea/compiler.xml	(date 1603285947288)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <bytecodeTargetLevel target="1.8" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"PLATFORM\" />\r\n        <option name=\"distributionType\" value=\"DEFAULT_WRAPPED\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleJvm\" value=\"1.8\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveModulePerSourceSet\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/gradle.xml	(revision 177c2881f9f4f7c9b4e12d644ac9437d83797eb3)
++++ .idea/gradle.xml	(date 1603285947308)
+@@ -15,6 +15,7 @@
+           </set>
+         </option>
+         <option name="resolveModulePerSourceSet" value="false" />
++        <option name="useQualifiedModuleNames" value="true" />
+       </GradleProjectSettings>
+     </option>
+   </component>
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_1_7\" project-jdk-name=\"1.8\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/misc.xml	(revision 177c2881f9f4f7c9b4e12d644ac9437d83797eb3)
++++ .idea/misc.xml	(date 1603285947274)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" project-jdk-name="1.8" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+   </component>
+   <component name="ProjectType">

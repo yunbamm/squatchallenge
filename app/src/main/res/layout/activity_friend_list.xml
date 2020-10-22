@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".friend_list">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@+id/toolbar">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:orientation="horizontal" android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <ImageView
+                        android:id="@+id/iv_profile"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="#FFFFFF"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="@+id/tv_name"
+                        app:srcCompat="@drawable/ic_launcher_foreground" />
+                    <TextView
+                        android:id="@+id/tv_name"
+                        android:layout_width="160dp"
+                        android:layout_height="100dp"
+                        android:layout_marginTop="26dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="이름"
+                        android:textColor="#000000"
+                        android:textSize="28sp"
+                        android:gravity="center_horizontal|center_vertical"
+                        app:layout_constraintLeft_toRightOf="@+id/iv_profile"
+                        app:layout_constraintRight_toRightOf="@+id/add_friend" />
+                    <Button
+                        android:id="@+id/add_friend_button"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:text="친구추가"
+                        android:textSize="10sp"
+                        app:layout_constraintLeft_toRightOf="@+id/tv_name"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_friend_chang"
+                    android:layout_width="250dp"
+                    android:layout_height="60dp"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginTop="50dp"
+                    android:background="@drawable/border1">
+                    <TextView
+                        android:id="@+id/add_friend_name"
+                        android:layout_width="200dp"
+                        android:layout_height="60dp"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:text="" />
+                    <Button
+                        android:id="@+id/add_friend"
+                        android:layout_width="50dp"
+                        android:layout_height="60dp"
+                        android:gravity="center_horizontal|center_vertical"
+                        android:text="추가" />
+                </LinearLayout>
+            </FrameLayout>
+            <TextView
+                android:id="@+id/isOnline"
+                android:text="온라인"
+                android:layout_width="170dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="150dp"
+                android:layout_marginLeft="30dp"/>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <include
+        layout="@layout/content_scrolling"
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
+        android:layout_marginTop="200dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        app:srcCompat="@android:drawable/ic_dialog_email" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
