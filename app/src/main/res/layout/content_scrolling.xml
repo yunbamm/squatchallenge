@@ -31,8 +31,9 @@
                 android:text="이름"
                 android:layout_marginLeft="5dp"
                 android:textColor="#000000"
-                android:textSize="26dp"
-                app:layout_constraintStart_toEndOf="@+id/friend_image" />
+                android:textSize="26sp"
+                app:layout_constraintStart_toEndOf="@+id/friend_image"
+                android:layout_marginStart="5dp" />
 
             <Button
                 android:id="@+id/vs_friend"
@@ -42,8 +43,9 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:text="친선전"
                 android:textColor="#000000"
-                android:textSize="9dp"
-                app:layout_constraintStart_toEndOf="@+id/friend_name" />
+                android:textSize="9sp"
+                app:layout_constraintStart_toEndOf="@+id/friend_name"
+                android:layout_marginStart="10dp" />
 
             <Button
                 android:id="@+id/delete_friend"
@@ -53,7 +55,7 @@
                 android:textColor="#000000"
                 android:text="친구삭제"
                 android:gravity="center_horizontal|center_vertical"
-                android:textSize="9dp"
+                android:textSize="9sp"
                 app:layout_constraintStart_toEndOf="@+id/vs_friend"/>
         </LinearLayout>
 

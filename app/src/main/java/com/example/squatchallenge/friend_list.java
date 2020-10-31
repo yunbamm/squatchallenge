@@ -19,6 +19,7 @@ public class friend_list extends AppCompatActivity {
     private Button add_friend_button;
     private View add_friend_chang;
     private View friend_plus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
