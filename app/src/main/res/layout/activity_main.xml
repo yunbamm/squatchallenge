@@ -33,9 +33,9 @@
             android:layout_marginLeft="160dp"
             android:layout_marginTop="15dp"
             android:gravity="center_vertical |center_horizontal"
-            android:text="매 일 노 력 하 는 자"
+            android:text= "매 일 노 력 하 는 자"
             android:textColor="#000000"
-            android:textSize="26sp" />
+            android:textSize="22sp" />
 
         <TextView
             android:id="@+id/tv_name"
@@ -44,7 +44,7 @@
             android:layout_marginLeft="150dp"
             android:layout_marginTop="65dp"
             android:gravity="center_vertical |center_horizontal"
-            android:text="이름"
+            android:text="I D"
             android:textColor="#000000"
             android:textSize="32sp"
             app:layout_constraintEnd_toStartOf="@+id/tv_Lv"
@@ -59,7 +59,7 @@
             android:gravity="center_vertical |center_horizontal"
             android:text="Lv.11"
             android:textColor="#000000"
-            android:textSize="26sp"
+            android:textSize="22sp"
             app:layout_constraintStart_toEndOf="@+id/tv_name" />
 
     </RelativeLayout>
@@ -70,7 +70,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:orientation="horizontal"
@@ -78,35 +78,72 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/relativelayout">
 
-        <Button
-            android:id="@+id/btn_total"
-            android:text="퀘스트"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:layout_marginLeft="2dp"
-            android:layout_width="125dp"
-            android:layout_height="55dp"
-            android:background="@drawable/buttonshape1" />
+        <LinearLayout
+            android:id="@+id/Quest"
+            android:layout_width="135dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="3dp"
+            android:background="@drawable/buttonshape1">
 
-        <Button
-            android:id="@+id/btn_timeattack"
-            android:text="랭 킹"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:layout_marginLeft="15dp"
-            android:layout_width="125dp"
-            android:layout_height="55dp"
-            android:background="@drawable/buttonshape1" />
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                app:srcCompat="@drawable/quest2" />
 
-        <Button
-            android:id="@+id/btn_friendlist"
-            android:text="친구목록"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:layout_marginLeft="15dp"
-            android:layout_width="125dp"
-            android:layout_height="55dp"
-            android:background="@drawable/buttonshape1" />
+            <Button
+                android:layout_width="70dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="#FFFAE3"
+                android:text="퀘스트"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Ranking"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
+            android:background="@drawable/buttonshape1">
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                app:srcCompat="@drawable/crown3" />
+
+            <Button
+                android:layout_width="65dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="#FFFFFF"
+                android:text="랭 킹"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Friendlist"
+            android:layout_width="140dp"
+            android:layout_height="50dp"
+            android:background="@drawable/buttonshape1">
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                app:srcCompat="@drawable/friends1" />
+
+            <Button
+                android:layout_width="75dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="#FFFFFF"
+                android:text="친구목록"
+                android:textSize="15sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -126,41 +163,41 @@
             <ImageView
                 android:id="@+id/ranking1"
                 android:layout_width="150dp"
-                android:layout_height="240dp"
+                android:layout_height="200dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:background="@drawable/buttonshape2" />
 
             <ImageView
                 android:id="@+id/ranking2"
                 android:layout_width="150dp"
-                android:layout_height="240dp"
-                android:layout_marginStart="8dp"
+                android:layout_height="200dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:background="@drawable/buttonshape2" />
 
             <ImageView
                 android:id="@+id/ranking3"
                 android:layout_width="150dp"
-                android:layout_height="240dp"
-                android:layout_marginStart="8dp"
+                android:layout_height="200dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:background="@drawable/buttonshape2" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout4"
-        android:layout_width="409dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginStart="8dp"
@@ -175,18 +212,20 @@
         <Button
             android:id="@+id/btn_solo"
             android:layout_width="250dp"
-            android:layout_height="240dp"
+            android:layout_height="210dp"
             android:layout_weight="1"
             android:text="SOLO"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:background="@drawable/buttonshape2" />
 
         <Button
             android:id="@+id/btn_random"
             android:layout_width="250dp"
-            android:layout_height="240dp"
+            android:layout_height="210dp"
             android:layout_weight="1"
             android:text="Random"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:background="@drawable/buttonshape2" />
 
     </LinearLayout>
 

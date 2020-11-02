@@ -1,109 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/list"
+    android:name="com.example.squatchallenge.ItemFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".friend_list"
-    tools:showIn="@layout/activity_friend_list">
-
-    <LinearLayout
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp">
-            <ImageView
-                android:id="@+id/friend_image"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="#FFFFFF"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
-            <TextView
-                android:id="@+id/friend_name"
-                android:layout_width="160dp"
-                android:layout_height="50dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="이름"
-                android:layout_marginLeft="5dp"
-                android:textColor="#000000"
-                android:textSize="26sp"
-                app:layout_constraintStart_toEndOf="@+id/friend_image"
-                android:layout_marginStart="5dp" />
-
-            <Button
-                android:id="@+id/vs_friend"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="10dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="친선전"
-                android:textColor="#000000"
-                android:textSize="9sp"
-                app:layout_constraintStart_toEndOf="@+id/friend_name"
-                android:layout_marginStart="10dp" />
-
-            <Button
-                android:id="@+id/delete_friend"
-                android:layout_width="60dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="3dp"
-                android:textColor="#000000"
-                android:text="친구삭제"
-                android:gravity="center_horizontal|center_vertical"
-                android:textSize="9sp"
-                app:layout_constraintStart_toEndOf="@+id/vs_friend"/>
-        </LinearLayout>
-
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button One" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Two" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Three" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Four" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Five" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Six" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Seven" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Eight" />
-        <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:text="Button Nine" />
-    </LinearLayout>
-
-</androidx.core.widget.NestedScrollView>
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    app:layoutManager="LinearLayoutManager"
+    tools:context=".ItemFragment"
+    tools:listitem="@layout/friend_list" />
