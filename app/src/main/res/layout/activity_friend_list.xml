@@ -109,7 +109,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
     <include
-        layout="@layout/content_scrolling"
+        layout="@layout/friendlist_scroll"
         android:layout_height="fill_parent"
         android:layout_width="fill_parent"
         android:layout_marginTop="200dp"/>
