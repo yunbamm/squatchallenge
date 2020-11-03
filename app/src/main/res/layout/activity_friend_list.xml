@@ -28,12 +28,10 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal">
-
                     <ImageView
                         android:id="@+id/iv_profile_f"
                         android:layout_width="100dp"
@@ -44,7 +42,6 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="@+id/tv_name"
                         app:srcCompat="@drawable/friends1" />
-
                     <TextView
                         android:id="@+id/tv_name_f"
                         android:layout_width="160dp"
@@ -57,7 +54,6 @@
                         android:textSize="22sp"
                         app:layout_constraintLeft_toRightOf="@+id/iv_profile"
                         app:layout_constraintRight_toRightOf="@+id/add_friend" />
-
                     <Button
                         android:id="@+id/add_friend_button"
                         android:layout_width="70dp"
@@ -71,7 +67,6 @@
                         app:layout_constraintLeft_toRightOf="@+id/tv_name"
                         android:background="@drawable/buttonshape1"/>
                 </LinearLayout>
-
                 <LinearLayout
                     android:id="@+id/add_friend_chang"
                     android:layout_width="260dp"
@@ -79,7 +74,6 @@
                     android:layout_marginLeft="50dp"
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/buttonshape1">
-
                     <EditText
                         android:id="@+id/add_friend_name"
                         android:layout_width="175dp"
@@ -88,11 +82,11 @@
                         android:gravity="center_horizontal|center_vertical"
                         android:layout_gravity="center_vertical"
                         android:hint="아이디를 입력해주세요"
+                        android:textColor="#000000"
                         android:textSize="15sp"
                         android:background="#FFFFFF"
                         android:inputType="textWebEmailAddress"
                         android:textColorHint="#BAB9B9" />
-
                     <Button
                         android:id="@+id/add_friend"
                         android:layout_width="50dp"

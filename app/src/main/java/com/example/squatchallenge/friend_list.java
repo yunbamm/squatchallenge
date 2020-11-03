@@ -57,7 +57,7 @@ public class friend_list extends AppCompatActivity {
                 add_friend_chang.setVisibility(View.INVISIBLE);
             }
         });
-        recyclerView = findViewById(R.id.list);
+        recyclerView = findViewById(R.id.list_friend);
 
         // 리사이클러뷰의 notify()처럼 데이터가 변했을 때 성능을 높일 때 사용한다.
         recyclerView.setHasFixedSize(true);
