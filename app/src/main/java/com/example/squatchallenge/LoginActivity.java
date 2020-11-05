@@ -52,8 +52,6 @@ import java.util.Map;
 
         //-------------------------------------------------------------------
 
-
-
         @Override
     protected void onCreate(Bundle savedInstanceState) {        //앱이 실행될때 처음 수행
         super.onCreate(savedInstanceState);

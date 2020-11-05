@@ -88,7 +88,7 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:text="업 적"
+                android:text="@string/achievement"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:textSize="32sp"/>
@@ -160,7 +160,7 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:text="기 록"
+                android:text="@string/record"
                 android:gravity="center_vertical"
                 android:layout_gravity="center_vertical"
                 android:textSize="32sp"/>
@@ -231,7 +231,7 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:text="설 정"
+                android:text="@string/setting"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:textSize="32sp"/>
@@ -256,7 +256,7 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:text="고 객 센 터"
+                android:text="@string/customer_center"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:textSize="32sp"/>
