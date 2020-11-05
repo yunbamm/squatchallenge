@@ -97,6 +97,7 @@
                     android:layout_gravity="center_vertical"
                     android:background="@color/fui_bgGoogle"
                     android:fadeScrollbars="true"
+                    android:textStyle="bold"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="퀘 스 트"
                     android:textSize="15sp" />
@@ -118,6 +119,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:background="#FFFFFF"
+                    android:textStyle="bold"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="랭  킹"
                     android:textSize="15sp" />
@@ -139,12 +141,13 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:background="#FFFFFF"
+                    android:textStyle="bold"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="친 구 목 록"
                     android:textSize="15sp" />
             </LinearLayout>
         </LinearLayout>
-        <FrameLayout
+        <RelativeLayout
             android:layout_width="480dp"
             android:layout_height="210dp"
             android:layout_marginTop="10dp">
@@ -170,7 +173,7 @@
                         android:id="@+id/quest_name1"
                         android:layout_width="90dp"
                         android:layout_height="50dp"
-                        android:text="스쿼트 55회"
+                        android:textStyle="bold"
                         android:textSize="18sp"
                         android:gravity="center"
                         android:layout_gravity="center" />
@@ -196,7 +199,7 @@
                         android:id="@+id/quest_name2"
                         android:layout_width="90dp"
                         android:layout_height="50dp"
-                        android:text="스쿼트 55회"
+                        android:textStyle="bold"
                         android:textSize="18sp"
                         android:gravity="center"
                         android:layout_gravity="center" />
@@ -222,7 +225,7 @@
                         android:id="@+id/quest_name3"
                         android:layout_width="90dp"
                         android:layout_height="50dp"
-                        android:text="스쿼트 55회"
+                        android:textStyle="bold"
                         android:textSize="18sp"
                         android:gravity="center"
                         android:layout_gravity="center" />
@@ -237,39 +240,39 @@
             </LinearLayout>
             <HorizontalScrollView
                 android:id="@+id/scrollview"
-                android:layout_width="480dp"
+                android:layout_width="460dp"
                 android:layout_height="210dp"
                 android:scrollbars="none"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
                 <LinearLayout
                     android:id="@+id/Rankers"
-                    android:layout_width="460dp"
+                    android:layout_width="440dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:orientation="horizontal">
                     <ImageView
                         android:id="@+id/ranking1"
-                        android:layout_width="150dp"
+                        android:layout_width="140dp"
                         android:layout_height="200dp"
                         android:layout_marginLeft="8dp"
                         android:background="@drawable/ranker1"
                         app:layout_constraintStart_toStartOf="parent" />
                     <ImageView
                         android:id="@+id/ranking2"
-                        android:layout_width="150dp"
+                        android:layout_width="140dp"
                         android:layout_height="200dp"
                         android:layout_marginLeft="8dp"
                         android:background="@drawable/ranker2" />
                     <ImageView
                         android:id="@+id/ranking3"
-                        android:layout_width="150dp"
+                        android:layout_width="140dp"
                         android:layout_height="200dp"
                         android:layout_marginLeft="8dp"
                         android:background="@drawable/ranker3" />
                 </LinearLayout>
             </HorizontalScrollView>
-        </FrameLayout>
+        </RelativeLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="210dp"
@@ -289,6 +292,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:text="S O L O"
                     android:gravity="center_horizontal"
                     android:textSize="22sp"/>
@@ -308,6 +312,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:text="R A N D O M"
                     android:gravity="center_horizontal"
                     android:textSize="22sp"/>

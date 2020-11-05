@@ -40,14 +40,14 @@ public class friend_list extends AppCompatActivity {
         add_friend_button = findViewById(R.id.add_friend_button);
         add_friend = findViewById(R.id.add_friend);
 
-        add_friend_button.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행
+        add_friend_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 add_friend_chang.setVisibility(View.VISIBLE);
             }
         });
 
-        add_friend.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행
+        add_friend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 add_friend_chang.setVisibility(View.INVISIBLE);

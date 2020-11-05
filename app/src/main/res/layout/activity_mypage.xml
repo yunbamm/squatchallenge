@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:layout_marginRight="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -93,6 +93,7 @@
                 android:gravity="center_vertical"
                 android:textSize="32sp"/>
             <ImageButton
+                android:id="@+id/to_ach"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_width="50dp"
@@ -165,6 +166,7 @@
                 android:layout_gravity="center_vertical"
                 android:textSize="32sp"/>
             <ImageButton
+                android:id="@+id/to_record"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_width="50dp"
@@ -212,6 +214,7 @@
             </Button>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/t0_setting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -237,6 +240,7 @@
                 android:textSize="32sp"/>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/to_cuscen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"

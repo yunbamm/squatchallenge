@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,24 +22,37 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private LinearLayout Quest;
     private LinearLayout questlist;
     private LinearLayout friendlist;
+    private LinearLayout Solo;
+    private LinearLayout Random;
     private HorizontalScrollView scrollview;
     private TextView tv_result;
+    private TextView quest_name1;
+    private TextView quest_name2;
+    private TextView quest_name3;
     private ImageView iv_profile;
-    String[] questSet = {"스쿼트 55회","1대1 3회","친구추가\n1회","스쿼트 100회", "혼자하기\n3회","1대1 5회",
-            "1대1 3회\n승리","혼자하기\n5회","친선전 1회"};
+    private ImageView reroll1;
+    private ImageView reroll2;
+    private ImageView reroll3;
+    private int questcnt;
+    Map<Integer,String> questSet = new HashMap<>();
+    quest[] today_quest = new quest[3];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        quest q = new quest("",0,true);
+        q.setTodayQuest();
 
         Intent intent = getIntent();
-        String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
+        final String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
         String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
 
         tv_result = findViewById(R.id.tv_name);
@@ -61,9 +76,39 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        reroll1 = findViewById(R.id.reroll1);
+        reroll2 = findViewById(R.id.reroll2);
+        reroll3 = findViewById(R.id.reroll3);
+        reroll1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(questcnt>=8) questcnt=0;
+                quest_name1.setText(questSet.get(questcnt));
+                reroll1.setVisibility(View.INVISIBLE);
+                questcnt++;
+            }
+        });
+        reroll2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(questcnt>=8) questcnt=0;
+                quest_name2.setText(questSet.get(questcnt));
+                reroll2.setVisibility(View.INVISIBLE);
+                questcnt++;
+            }
+        });
+        reroll3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(questcnt>=8) questcnt=0;
+                quest_name3.setText(questSet.get(questcnt));
+                reroll3.setVisibility(View.INVISIBLE);
+                questcnt++;
+            }
+        });
 
         friendlist = findViewById(R.id.Friendlist);
-        friendlist.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행
+        friendlist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), friend_list.class);
@@ -71,27 +116,79 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        iv_profile.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행
+        iv_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), Mypage.class);
+                startActivity(intent);
+                intent.putExtra("name" , nickName);
+            }
+        });
+
+        Solo = findViewById(R.id.Solo);
+        Random = findViewById(R.id.Random);
+        Solo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), Play.class);
+                startActivity(intent);
+            }
+        });
+        Random.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), Play.class);
                 startActivity(intent);
             }
         });
     }
 
-    /*public void setQuest(){
-        boolean[] uesd = new boolean[9];
-        TextView view;
-        String quest_name;
-        for(int i=0;i<3;i++){
-            int random = (int)(Math.random()*9);
-             quest_name= "quest_name"+"i";
-            view = findViewById(R.id.quest_name);
+    public class quest{
+        String name;
+        int num;
+        Boolean clear;
+
+        quest (){
+            this.name="";
+            this.num=-1;
+            this.clear=false;
         }
-    }*/
 
-    public void rerollquest(LinearLayout view, int i){
+        quest (String q, int n, Boolean c){
+            this.name=q;
+            this.num=n;
+            this.clear=c;
+        }
 
+        void setTodayQuest(){
+            setQuest();
+            int ran = (int)(Math.random()*9);
+            for(int i=0;i<3;i++){
+                if(ran>=8) ran=0;
+                else if(ran<=0) ran=0;
+                today_quest[i]= new quest(questSet.get(ran),ran+1,false);
+                questSet.remove(ran);
+                ran++;
+            }
+            questcnt=ran;
+            quest_name1 = findViewById(R.id.quest_name1);
+            quest_name1.setText(today_quest[0].name);
+            quest_name2 = findViewById(R.id.quest_name2);
+            quest_name2.setText(today_quest[1].name);
+            quest_name3 = findViewById(R.id.quest_name3);
+            quest_name3.setText(today_quest[2].name);
+        }
+    };
+
+    public void setQuest(){
+        questSet.put(1,"스쿼트 55회");
+        questSet.put(2,"친선전 1회");
+        questSet.put(3,"1대1 3회");
+        questSet.put(4,"1대1 승리");
+        questSet.put(5,"스쿼트 100회");
+        questSet.put(6,"친구추가\n1회");
+        questSet.put(7,"혼자하기\n3회");
+        questSet.put(8,"랭커 영상\n1회 관전");
+        questSet.put(0,"친선전 승리");
     }
 }

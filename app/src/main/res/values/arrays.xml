@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="quests">
+        <item>스쿼트 50회</item>
+        <item>기 록</item>
+        <item>설 정</item>
+        <item>고 객 센 터</item>
+    </string-array>
+</resources>
