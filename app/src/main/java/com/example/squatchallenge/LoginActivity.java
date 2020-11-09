@@ -73,7 +73,6 @@ import java.util.Map;
         btn_google.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행
             @Override
             public void onClick(View view) {
-
                 Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);      //구글에서 제공하는 인증화면
                 startActivityForResult(intent , REQ_SIGN_GOOGLE);           //?
             }
@@ -153,6 +152,7 @@ import java.util.Map;
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             intent.putExtra("name" , account.getDisplayName());         //key값 :Nickname
                             intent.putExtra("photoUrl",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환
+                            intent.putExtra("Email",parsingEmail(account.getEmail()));
 
                             //----------------------------userid와 username을 가져온다
                             userEmail = account.getEmail();

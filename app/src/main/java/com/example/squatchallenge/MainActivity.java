@@ -1,27 +1,17 @@
 package com.example.squatchallenge;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.Auth;
-import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         final String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
         String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
+        final String email = intent.getStringExtra("Email");
 
         tv_result = findViewById(R.id.tv_name);
         tv_result.setText(nickName);        //닉네임 text를 텍스트뷰에 세팅
@@ -111,7 +102,8 @@ public class MainActivity extends AppCompatActivity {
         friendlist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), friend_list.class);
+                Intent intent = new Intent(getApplicationContext(), Friend_list.class);
+                intent.putExtra("Email" , email);
                 startActivity(intent);
             }
         });

@@ -15,7 +15,7 @@
             android:label="@string/title_activity_mypage"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".friend_list"
+            android:name=".Friend_list"
             android:label="@string/title_activity_friend_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".MainActivity" />
