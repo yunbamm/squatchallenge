@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         final String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
         String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
-        final String email = intent.getStringExtra("Email");
+        final String email = intent.getStringExtra("Email");        //구글이메일
 
         tv_result = findViewById(R.id.tv_name);
         tv_result.setText(nickName);        //닉네임 text를 텍스트뷰에 세팅
@@ -119,18 +119,21 @@ public class MainActivity extends AppCompatActivity {
 
         Solo = findViewById(R.id.Solo);
         Random = findViewById(R.id.Random);
+        
+        //솔로 플레이 버튼이 눌렸을때 (스피드모드)
         Solo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Play.class);
+                Intent intent = new Intent(getApplicationContext(), solo_speed_play.class);
+                intent.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
                 startActivity(intent);
             }
         });
+        //구현해야댐
         Random.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Play.class);
-                startActivity(intent);
+
             }
         });
     }
