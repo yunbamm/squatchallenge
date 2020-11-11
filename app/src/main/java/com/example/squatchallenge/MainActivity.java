@@ -1,8 +1,13 @@
 package com.example.squatchallenge;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.HorizontalScrollView;
@@ -34,12 +39,18 @@ public class MainActivity extends AppCompatActivity {
     Map<Integer,String> questSet = new HashMap<>();
     quest[] today_quest = new quest[3];
 
+    //카메라 권한을 위해
+    private int RESULT_PERMISSIONS = 100;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         quest q = new quest("",0,true);
         q.setTodayQuest();
+
+        // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
+        requestPermissionCamera();
 
         Intent intent = getIntent();
         final String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
@@ -185,5 +196,46 @@ public class MainActivity extends AppCompatActivity {
         questSet.put(7,"혼자하기\n3회");
         questSet.put(8,"랭커 영상\n1회 관전");
         questSet.put(0,"친선전 승리");
+    }
+
+    //카메라라
+    private boolean requestPermissionCamera() {
+        int sdkVersion = Build.VERSION.SDK_INT;
+        if(sdkVersion >= Build.VERSION_CODES.M) {
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.CAMERA},
+                        RESULT_PERMISSIONS);
+
+            }
+//            else {
+//                setInit();
+//            }
+        }
+//        else{  // version 6 이하일때
+//            setInit();
+//            return true;
+//        }
+
+        return true;
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        if (RESULT_PERMISSIONS == requestCode) {
+
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한 허가시
+                //setInit();
+            } else {
+                // 권한 거부시
+            }
+            return;
+        }
+
     }
 }

@@ -20,7 +20,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.view.SurfaceHolder;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,32 +27,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import org.tensorflow.lite.Interpreter;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Iterator;
 
-public class solo_speed_play extends AppCompatActivity implements Camera.PreviewCallback {
+public class team_play extends AppCompatActivity implements Camera.PreviewCallback{
 
     //카운트를 위해(시간)
     public TextView tv_timer;
     private CountDownTimer countDownTimer;
-    private long start_time, now_time, overTime;
+    private long start_time , now_time;
     private boolean game_end = false;
     private boolean game_start = false;
-
-    //DB접근을 위해
-    DatabaseReference DB;
-    String email = "";
 
     //카메라를 위해
     private static CameraPreview surfaceView;
@@ -61,17 +49,16 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
     private static Button camera_preview_button;
     private static Camera mCamera;
     private int RESULT_PERMISSIONS = 100;
-    public static solo_speed_play getInstance;
+    public static team_play getInstance;
     //모델 판단을 위해
     Interpreter tflite;
     public TextView tv_result;
     public TextView tv_count;
     public int count = 0;
-    public int[] arr = new int[3];      //0(up) 1(down)
+    public int []arr = new int[3];      //0(up) 1(down)
     public int index = 0;
     public boolean up = true;
     public boolean down = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +66,7 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
 
         //이메일을 알고있어야 db연동
         Intent intent = getIntent();
-        email = intent.getStringExtra("Email");        //구글이메일
+        final String email = intent.getStringExtra("Email");        //구글이메일
 
         // 카메라 프리뷰를  전체화면으로 보여주기 위해 셋팅한다.
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -101,16 +88,16 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
     }
 
     //카운트를 위해
-    public void countDownTimer() {
+    public void countDownTimer () {
         countDownTimer = new CountDownTimer(5000, 1000) {
             @Override
             public void onTick(long l) {
                 //0초면 토스트 메세지 띄운다
-                if (l / 1000 == 0) {
-                    Toast.makeText(getApplicationContext(), "Start!", Toast.LENGTH_SHORT).show();
-                } else tv_timer.setText(Long.toString(l / 1000));
+                if(l/1000 == 0){
+                    Toast.makeText(getApplicationContext() , "Start!",Toast.LENGTH_SHORT).show();
+                }
+                else tv_timer.setText(Long.toString(l/1000));
             }
-
             @Override
             public void onFinish() {
                 //0.0부터 타이머가 시작해야하므로
@@ -120,43 +107,43 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
             }
         };
     }
-
     //카운터 계산부분
-    private String getTime() {
-        //게임이 종료되지 않았다면
+    private String getTime(){
         //경과된 시간 체크
+
         now_time = SystemClock.elapsedRealtime();
         //시스템이 부팅된 이후의 시간?
-        overTime = now_time - start_time;
+        long overTime = now_time - start_time;
 
-        long m = overTime / 1000 / 60;
-        long s = (overTime / 1000) % 60;
+        long m = overTime/1000/60;
+        long s = (overTime/1000)%60;
 
         long ms = overTime % 1000;
 
-        //3분 넘어가면 게임종료
-        if (m >= 3) game_end = true;
+        //3분넘어가면 게임종료
+        if(m >= 3) game_end = true;
 
-        String recTime = String.format("%d:%02d:%03d", m, s, ms);
+        String recTime = String.format("%d:%02d:%03d",m,s,ms);
 
         return recTime;
     }
-
     //handler (카운터)
-    Handler handler = new Handler() {
+    Handler handler = new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
 
             tv_timer.setText(getTime());
 
-            if (!game_end) handler.sendEmptyMessage(0);
-
+            //30개를 했거나 시간이 3분이 넘어가면
+            if(game_end){
+                Toast.makeText(getApplicationContext() , "game끝!" , Toast.LENGTH_SHORT).show();
+            }
+            else handler.sendEmptyMessage(0);
         }
     };
-
     //판단 (up,down) 카운팅
-    public void determine(int n) {
-        if (index == 0 || index == 1) {
+    public  void determine(int n){
+        if(index==0 || index == 1) {
             arr[index] = n;
             index++;
         }
@@ -165,21 +152,21 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
             //우선 넣어주고
             arr[index] = n;
             //판단
-            if (arr[0] == arr[1] && arr[1] == arr[2]) {
+            if(arr[0] == arr[1] && arr[1]==arr[2]){
                 //down이 true인 상태에서 up인상태이면 count++
-                if (arr[0] == 0) {
-                    if (down) {
+                if(arr[0] == 0){
+                    if(down){
                         down = false;
                         count++;
                         tv_count = findViewById(R.id.tv_count);
                         tv_count.setText(Integer.toString(count));
 
                         //10개 채웠으면 game_end!
-                        if (count >= 1) game_end = true;
+                        if(count>=10) game_end = true;
                     }
                 }
                 //down
-                else {
+                else{
                     down = true;
                 }
             }
@@ -190,61 +177,16 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
         }
 
     }
-
-    //total_count 와 speed_time update
-    public void updateRecord() {
-
-        String [] s = {"/speed_time" , "/total_count"};
-        final long[] result = new long[2];
-
-        for (int i = 0; i < 2; i++) {
-            String tmp = s[i];
-            DB = FirebaseDatabase.getInstance().getReference("users/" + email + s[i]);         //해당 아이디 값들 조회
-            DB.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    //speed_time값을 가져옴
-                    if(tmp.equals("/speed_time")){
-                        result[0] = (long) snapshot.getValue();
-                    }
-                    //total_count값을 가져옴
-                    if(tmp.equals("/total_count")){
-                        result[1] = (long) snapshot.getValue();
-                    }
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-            //update
-            if(i==0 && result[0] > overTime){
-                DB.setValue(overTime);
-            }
-            if(i==1){
-                count += result[1];
-                DB.setValue(count);
-            }
-        }
-    }
-
-    //Frame마다
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         Camera.Parameters params = mCamera.getParameters();
 
+        //게임 끝이 아니고 게임이 시작됐다면
         //결과값 출력을 위해
-        tv_result = findViewById(R.id.tv_result);
-        tv_count = findViewById(R.id.tv_count);
-        //게임이 끝나면
-        if (game_end) {
-            surfaceView.surfaceDestroyed(holder);       //카메라 종료
-            updateRecord();                 //db의 total_count 와 speed_time update
-            Toast.makeText(getApplicationContext(), "game end!", Toast.LENGTH_SHORT).show();
-            //solo_speed_play.this.finish();      //액티비티 종료
-        }
-        //게임 끝이 아니고 게임이 시작됐다면(게임중이라면)
-        if (!game_end && game_start) {
+        if(!game_end && game_start) {
+            tv_result = findViewById(R.id.tv_result);
+            tv_count = findViewById(R.id.tv_count);
+
             int w = params.getPreviewSize().width;
             int h = params.getPreviewSize().height;
 
@@ -286,11 +228,11 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
 
 
     //bytes에서 rgb정보 추출
-    public int[] decodeYUV420SP(byte[] yuv420sp, int width, int height) {
+    public int[] decodeYUV420SP( byte[] yuv420sp, int width, int height) {
 
         final int frameSize = width * height;
 
-        int rgb[] = new int[width * height];
+        int rgb[]=new int[width*height];
         for (int j = 0, yp = 0; j < height; j++) {
             int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
             for (int i = 0; i < width; i++, yp++) {
@@ -306,12 +248,9 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
                 int g = (y1192 - 833 * v - 400 * u);
                 int b = (y1192 + 2066 * u);
 
-                if (r < 0) r = 0;
-                else if (r > 262143) r = 262143;
-                if (g < 0) g = 0;
-                else if (g > 262143) g = 262143;
-                if (b < 0) b = 0;
-                else if (b > 262143) b = 262143;
+                if (r < 0) r = 0; else if (r > 262143) r = 262143;
+                if (g < 0) g = 0; else if (g > 262143) g = 262143;
+                if (b < 0) b = 0; else if (b > 262143) b = 262143;
 
                 rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) &
                         0xff00) | ((b >> 10) & 0xff);
@@ -320,12 +259,10 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
         }
         return rgb;
     }
-
     //카메라 부분
-    public static Camera getCamera() {
+    public static Camera getCamera(){
         return mCamera;
     }
-
     private void setInit() {
         getInstance = this;
 
@@ -347,25 +284,24 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
     //허가
     private boolean requestPermissionCamera() {
         int sdkVersion = Build.VERSION.SDK_INT;
-        if (sdkVersion >= Build.VERSION_CODES.M) {
+        if(sdkVersion >= Build.VERSION_CODES.M) {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
-                ActivityCompat.requestPermissions(solo_speed_play.this,
+                ActivityCompat.requestPermissions(team_play.this,
                         new String[]{Manifest.permission.CAMERA},
                         RESULT_PERMISSIONS);
 
-            } else {
+            }else {
                 setInit();
             }
-        } else {  // version 6 이하일때
+        }else{  // version 6 이하일때
             setInit();
             return true;
         }
 
         return true;
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -388,13 +324,13 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
     //모델 로드 국룰
     private Interpreter getTfliteInterpreter(String modelPath) {
         try {
-            return new Interpreter(loadModelFile(solo_speed_play.this, modelPath));
-        } catch (Exception e) {
+            return new Interpreter(loadModelFile(team_play.this, modelPath));
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-
     private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {
         AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(modelPath);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());

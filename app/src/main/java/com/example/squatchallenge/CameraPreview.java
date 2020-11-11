@@ -81,6 +81,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mCamera.stopPreview();
             mCamera.release();
             mCamera = null;
+            //System.out.println("카메라 미리보기 종료가 호출됩니다!!!!!!!!!!!!!!!!!!!");
         }
     }
+
 }

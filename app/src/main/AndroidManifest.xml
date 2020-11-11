@@ -3,10 +3,13 @@
     package="com.example.squatchallenge">
 
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application
@@ -16,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".solo_speed_play"></activity>
+        <activity android:name=".team_play"></activity>
+        <activity android:name=".solo_speed_play" />
         <activity
             android:name=".Mypage"
             android:label="@string/title_activity_mypage"
