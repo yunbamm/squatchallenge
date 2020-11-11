@@ -39,10 +39,13 @@ public class Friend_list extends AppCompatActivity {
     private Button add_friend;
     private Button add_friend_button;
     private View add_friend_chang;
+    private TextView friends_num;
     RecyclerView recyclerView;
     RecyclerView.Adapter adapter;
     RecyclerView.LayoutManager layoutManager;
     DatabaseReference DB;
+    String email="";
+    String[] friendSet = {"친구를 추가하세요"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +56,14 @@ public class Friend_list extends AppCompatActivity {
         CollapsingToolbarLayout toolBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         toolBarLayout.setTitle(getTitle());
         Intent intent = getIntent();
-        final String email = intent.getStringExtra("Email");
+        email = intent.getStringExtra("Email");
         DB = FirebaseDatabase.getInstance().getReference("users").child(email);
 
         add_friend_chang = findViewById(R.id.add_friend_chang);
         add_friend_chang.setVisibility(View.INVISIBLE);
         add_friend_button = findViewById(R.id.add_friend_button);
         add_friend = findViewById(R.id.add_friend);
+        friends_num = findViewById(R.id.friends_num);
 
         add_friend_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,7 +77,7 @@ public class Friend_list extends AppCompatActivity {
             public void onClick(View view) {
                 EditText add_friend_name = findViewById(R.id.add_friend_name);
                 String _add_friend_name = add_friend_name.getText().toString();
-                flistcheck(_add_friend_name);
+                newfriend(_add_friend_name);
                 add_friend_chang.setVisibility(View.INVISIBLE);
             }
         });
@@ -84,29 +88,21 @@ public class Friend_list extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        String[] friendSet = {"endeoddl9","dopax","greenday","akaps","pnpm"};
-        int[] imgSet = {R.drawable.ic_launcher_foreground, R.drawable.ic_launcher_foreground, R.drawable.ic_launcher_foreground, R.drawable.ic_launcher_foreground, R.drawable.ic_launcher_foreground};
-
-        adapter = new MyAdapter_friend(friendSet, imgSet);
-        recyclerView.setAdapter(adapter);
+        make_friendSet();
     }
 
     public class MyAdapter_friend extends RecyclerView.Adapter<MyAdapter_friend.MyViewHolder> {
         private String[] textSet ={};
-        private int[] imgSet ={};
 
-        public MyAdapter_friend(String[] textSet, int[] imgSet){
+        public MyAdapter_friend(String[] textSet){
             this.textSet = textSet;
-            this.imgSet = imgSet;
         }
 
         public class MyViewHolder extends  RecyclerView.ViewHolder{
-            public ImageView imageView;
             public TextView textView;
 
             public MyViewHolder(View view){
                 super(view);
-                this.imageView = view.findViewById(R.id.friend_img);
                 this.textView = view.findViewById(R.id.friend_name);
             }
         }
@@ -120,37 +116,36 @@ public class Friend_list extends AppCompatActivity {
         @Override
         public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
             myViewHolder.textView.setText(this.textSet[i]);
-            myViewHolder.imageView.setBackgroundResource(this.imgSet[i]);
         }
 
         @Override
         public int getItemCount() {
-            return Math.max(textSet.length, imgSet.length);
+            return textSet.length;
         }
     }
 
-    public void new_friend(String fname){
-        User friend = new User(fname);
-        DB.child("friend_list").child(fname).push().setValue(friend);
-    }
-
-    public void fcheck(final String fname) {
-        DB = DB.child("friend_list");
+    public void newfriend(final String fname) {
+        DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/friend_list");
         DB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean exist = false;
                 Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
+                int friends = (int)snapshot.getChildrenCount();
 
                 while (child.hasNext()) {
-                    if (child.next().getKey().equals(fname)) {
+                    if (child.next().getValue().equals(fname)) {
                         exist = true;
                         break;
                     }
                 }
 
                 if(!exist){
-                    new_friend(fname);
+                    DB.push().setValue(fname);
+                    friendSet[friends] = fname;
+                    adapter = new MyAdapter_friend(friendSet);
+                    recyclerView.setAdapter(adapter);
+                    friends_num.setText("친구 2 / "+ (friends+1));
                 }
             }
             @Override
@@ -160,24 +155,19 @@ public class Friend_list extends AppCompatActivity {
         });
     }
 
-    public void flistcheck(final String fname) {
+    public void make_friendSet() {
+
+        DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/friend_list");
         DB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                boolean exist = false;
                 Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
+                int friends = (int)snapshot.getChildrenCount();
+                friends_num.setText("친구 2 / "+ friends);
 
-                while (child.hasNext()) {
-                    if (child.next().getKey()=="friend_list") {
-                        fcheck(fname);
-                        break;
-                    }
-                }
-
-                if(!exist){
-                    Map<String, Object> friend_list = new HashMap<>();
-                    DB.updateChildren(friend_list);
-                    new_friend(fname);
+                for(int i=0;i<friends;i++) {
+                    friendSet[i] = (String)snapshot.getValue();
+                    child.next();
                 }
             }
             @Override
@@ -185,5 +175,7 @@ public class Friend_list extends AppCompatActivity {
 
             }
         });
+        adapter = new MyAdapter_friend(friendSet);
+        recyclerView.setAdapter(adapter);
     }
 }
