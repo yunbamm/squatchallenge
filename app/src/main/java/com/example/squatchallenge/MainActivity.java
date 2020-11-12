@@ -1,5 +1,6 @@
 package com.example.squatchallenge;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -7,6 +8,8 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -16,11 +19,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
     private LinearLayout Quest;
     private LinearLayout questlist;
     private LinearLayout friendlist;
@@ -140,11 +150,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        //구현해야댐
+        //랜덤(협력)
         Random.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(getApplicationContext(), team_play.class);
+                intent.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+                startActivity(intent);
             }
         });
     }

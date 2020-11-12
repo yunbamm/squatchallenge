@@ -286,7 +286,6 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
 
     //bytes에서 rgb정보 추출
     public int[] decodeYUV420SP(byte[] yuv420sp, int width, int height) {
-
         final int frameSize = width * height;
 
         int rgb[] = new int[width * height];
@@ -327,6 +326,8 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
 
     private void setInit() {
         getInstance = this;
+
+
 
         // 카메라 객체를 R.layout.activity_main의 레이아웃에 선언한 SurfaceView에서 먼저 정의해야 함으로 setContentView 보다 먼저 정의한다.
         mCamera = Camera.open();

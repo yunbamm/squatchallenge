@@ -10,18 +10,37 @@ import android.view.SurfaceView;
 import java.io.IOException;
 import java.util.List;
 
-public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback{
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
     public List<Camera.Size> listPreviewSizes;
     private Camera.Size previewSize;
     private Context context;
 
+    //content를 파싱해서 맞는 카메라를 켜줌
+    public String parsing(String s){
+        String result = "";
+
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i) == '@'){
+                break;
+            }
+            else result+=s.charAt(i);
+        }
+        return result;
+    }
     // SurfaceView 생성자
     public CameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-        mCamera = solo_speed_play.getCamera();
+
+        String s = context.toString();
+        String field = parsing(s);
+
+        if(field.equals("com.example.squatchallenge.solo_speed_play")) mCamera = solo_speed_play.getCamera();
+        if(field.equals("com.example.squatchallenge.team_play")) mCamera = team_play.getCamera();
+        //mCamera = solo_speed_play.getCamera();
+
         if(mCamera == null){
             mCamera = Camera.open();
         }
