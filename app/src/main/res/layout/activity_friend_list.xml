@@ -43,7 +43,7 @@
                         app:layout_constraintRight_toRightOf="@+id/tv_name"
                         app:srcCompat="@drawable/friends1" />
                     <TextView
-                        android:id="@+id/tv_name_f"
+                        android:id="@+id/friends_num"
                         android:layout_width="160dp"
                         android:layout_height="100dp"
                         android:layout_marginLeft="10dp"
