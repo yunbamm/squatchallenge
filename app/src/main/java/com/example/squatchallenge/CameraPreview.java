@@ -37,10 +37,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             if(mCamera  == null){
                 mCamera  = Camera.open();
             }
-
             // 카메라 설정
             Camera.Parameters parameters = mCamera .getParameters();
-
             // 카메라의 회전이 가로/세로일때 화면을 설정한다.
             if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
                 parameters.set("orientation", "portrait");
@@ -52,9 +50,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 parameters.setRotation(0);
             }
             mCamera.setParameters(parameters);
-
             mCamera.setPreviewDisplay(surfaceHolder);
-
             // 카메라 미리보기를 시작한다.
             mCamera.startPreview();
 
@@ -79,9 +75,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         if(mCamera != null){
             // 카메라 미리보기를 종료한다.
             mCamera.stopPreview();
+            mCamera.setPreviewCallback(null);
             mCamera.release();
             mCamera = null;
-            //System.out.println("카메라 미리보기 종료가 호출됩니다!!!!!!!!!!!!!!!!!!!");
         }
     }
 

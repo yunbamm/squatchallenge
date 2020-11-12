@@ -52,7 +52,8 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
     private boolean game_start = false;
 
     //DB접근을 위해
-    DatabaseReference DB;
+    DatabaseReference DB_speed;
+    DatabaseReference DB_total;
     String email = "";
 
     //카메라를 위해
@@ -102,7 +103,7 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
 
     //카운트를 위해
     public void countDownTimer() {
-        countDownTimer = new CountDownTimer(5000, 1000) {
+        countDownTimer = new CountDownTimer(1000, 1000) {
             @Override
             public void onTick(long l) {
                 //0초면 토스트 메세지 띄운다
@@ -190,61 +191,59 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
         }
 
     }
-
     //total_count 와 speed_time update
     public void updateRecord() {
-
-        String [] s = {"/speed_time" , "/total_count"};
-        final long[] result = new long[2];
-
-        for (int i = 0; i < 2; i++) {
-            String tmp = s[i];
-            DB = FirebaseDatabase.getInstance().getReference("users/" + email + s[i]);         //해당 아이디 값들 조회
-            DB.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    //speed_time값을 가져옴
-                    if(tmp.equals("/speed_time")){
-                        result[0] = (long) snapshot.getValue();
-                    }
-                    //total_count값을 가져옴
-                    if(tmp.equals("/total_count")){
-                        result[1] = (long) snapshot.getValue();
-                    }
+        //String[] s = {"/speed_time", "/total_count"};
+        //speed_time
+        DB_speed = FirebaseDatabase.getInstance().getReference("/users/" + email + "/speed_time");         //해당 아이디 값들 조회
+        DB_speed.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //만약 더빠르다면 update
+                long result = (long) snapshot.getValue();
+                if (result > overTime) {
+                    DB_speed.setValue(overTime);
                 }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
-            //update
-            if(i==0 && result[0] > overTime){
-                DB.setValue(overTime);
             }
-            if(i==1){
-                count += result[1];
-                DB.setValue(count);
+        });
+        //total_count
+        DB_total = FirebaseDatabase.getInstance().getReference("/users/" + email + "/total_count");         //해당 아이디 값들 조회
+        DB_total.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                System.out.println(snapshot.getValue()+"!!!!!!!!!!!!!!!!!!!!!!");
+                long result = (long) snapshot.getValue();
+                result += count;
+                DB_total.setValue(result);
             }
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     //Frame마다
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-        Camera.Parameters params = mCamera.getParameters();
-
         //결과값 출력을 위해
         tv_result = findViewById(R.id.tv_result);
         tv_count = findViewById(R.id.tv_count);
         //게임이 끝나면
         if (game_end) {
-            surfaceView.surfaceDestroyed(holder);       //카메라 종료
             updateRecord();                 //db의 total_count 와 speed_time update
             Toast.makeText(getApplicationContext(), "game end!", Toast.LENGTH_SHORT).show();
-            //solo_speed_play.this.finish();      //액티비티 종료
+            surfaceView.surfaceDestroyed(holder);       //preview 종료
+            solo_speed_play.this.finish();      //액티비티 종료
         }
         //게임 끝이 아니고 게임이 시작됐다면(게임중이라면)
-        if (!game_end && game_start) {
+        else if (game_start && !(mCamera == null)) {
+            Camera.Parameters params= mCamera.getParameters();
+
             int w = params.getPreviewSize().width;
             int h = params.getPreviewSize().height;
 
