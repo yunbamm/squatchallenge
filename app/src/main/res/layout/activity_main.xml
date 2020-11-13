@@ -45,12 +45,11 @@
                     android:layout_width="130dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center"
-                    android:background="@color/fui_bgGoogle"
                     android:fadeScrollbars="true"
                     android:textStyle="bold"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="마 이 페 이 지"
-                    android:backgroundTint="#575757"
+                    android:background="#575757"
                     android:textColor="#FFE607"
                     android:textSize="20sp" />
             </LinearLayout>

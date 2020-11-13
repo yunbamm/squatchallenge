@@ -1,6 +1,5 @@
 package com.example.squatchallenge;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.app.ActivityCompat;
@@ -8,32 +7,21 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.android.gms.auth.api.Auth;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout Mypage;
-    private LinearLayout Quest;
+
     private LinearLayout friendlist;
     private LinearLayout Solo;
     private LinearLayout Random;
+    public LinearLayout Mypage;
+    public LinearLayout Quest;
     /*private TextView quest_name1;
     private TextView quest_name2;
     private TextView quest_name3;
@@ -62,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         final String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
         final String email = intent.getStringExtra("Email");        //구글이메일
 
-        /*Quest = findViewById(R.id.Quest);
-        questlist = findViewById(R.id.questlist);
+        Quest = findViewById(R.id.Quest);
+        /*questlist = findViewById(R.id.questlist);
         scrollview = findViewById(R.id.scrollview);
         Quest.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,34 +98,47 @@ public class MainActivity extends AppCompatActivity {
         });*/
 
         friendlist = findViewById(R.id.Friendlist);
-        friendlist.setOnClickListener(view -> {
-            Intent intent12 = new Intent(getApplicationContext(), Friend_list.class);
-            intent12.putExtra("Email" , email);
-            startActivity(intent12);
+        friendlist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent12 = new Intent(getApplicationContext(), Friend_list.class);
+                intent12.putExtra("Email" , email);
+                startActivity(intent12);
+            }
         });
 
         Mypage.findViewById(R.id.Mypage);
-        Mypage.setOnClickListener(view -> {
-           Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
-           startActivity(intent1);
-           intent1.putExtra("name" , nickName);
-           intent1.putExtra("photoUrl",photoUrl);
+        Mypage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
+                startActivity(intent1);
+                intent1.putExtra("name" , nickName);
+                intent1.putExtra("photoUrl",photoUrl);
+            }
         });
 
         Solo = findViewById(R.id.Solo);
         Random = findViewById(R.id.Random);
         
         //솔로 플레이 버튼이 눌렸을때 (스피드모드)
-        Solo.setOnClickListener(view -> {
-            Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
-            intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
-            startActivity(intent14);
+        Solo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
+                intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+                startActivity(intent14);
+            }
         });
         //랜덤(협력)
-        Random.setOnClickListener(view -> {
-            Intent intent13 = new Intent(getApplicationContext(), team_play.class);
-            intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
-            startActivity(intent13);
+        Random.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent13 = new Intent(getApplicationContext(), team_play.class);
+                intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+                startActivity(intent13);
+            }
+
         });
     }
 
