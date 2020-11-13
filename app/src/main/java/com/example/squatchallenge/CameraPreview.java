@@ -58,6 +58,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             }
             // 카메라 설정
             Camera.Parameters parameters = mCamera .getParameters();
+            parameters.setPreviewFrameRate(10);
 
             // 카메라의 회전이 가로/세로일때 화면을 설정한다.
             if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
