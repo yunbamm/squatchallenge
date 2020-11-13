@@ -29,7 +29,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
             <LinearLayout
-                android:id="@+id/Quest"
+                android:id="@+id/Mypage"
                 android:layout_width="200dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
@@ -40,7 +40,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
-                    app:srcCompat="@drawable/quest2_1" />
+                    app:srcCompat="@drawable/me1_1" />
                 <TextView
                     android:layout_width="130dp"
                     android:layout_height="40dp"
@@ -49,13 +49,13 @@
                     android:fadeScrollbars="true"
                     android:textStyle="bold"
                     android:gravity="center_vertical|center_horizontal"
-                    android:text="퀘 스 트"
+                    android:text="마 이 페 이 지"
                     android:backgroundTint="#575757"
                     android:textColor="#FFE607"
                     android:textSize="20sp" />
             </LinearLayout>
             <LinearLayout
-                android:id="@+id/Ranking"
+                android:id="@+id/Quest"
                 android:layout_width="200dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
@@ -66,7 +66,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
-                    app:srcCompat="@drawable/rank2_1" />
+                    app:srcCompat="@drawable/quest2_1" />
                 <TextView
                     android:layout_width="130dp"
                     android:layout_height="40dp"
@@ -75,7 +75,7 @@
                     android:textStyle="bold"
                     android:textColor="#FFE607"
                     android:gravity="center_vertical|center_horizontal"
-                    android:text="랭     킹"
+                    android:text="퀘 스 트"
                     android:textSize="20sp" />
             </LinearLayout>
             <LinearLayout
@@ -154,7 +154,7 @@
                     android:textStyle="bold"
                     android:layout_gravity="center"
                     android:layout_marginTop="5dp"
-                    android:text="COOPERATE"
+                    android:text="@string/cooperate"
                     android:textColor="#FFE607"
                     android:gravity="center"
                     android:textSize="24sp"/>
