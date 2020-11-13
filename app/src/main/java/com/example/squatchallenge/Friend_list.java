@@ -72,6 +72,7 @@ public class Friend_list extends AppCompatActivity {
             }
         });
 
+
         add_friend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,6 +82,7 @@ public class Friend_list extends AppCompatActivity {
                 add_friend_chang.setVisibility(View.INVISIBLE);
             }
         });
+        // recyclerview 국룰
         recyclerView = findViewById(R.id.list_friend);
 
         recyclerView.setHasFixedSize(true);
@@ -88,9 +90,11 @@ public class Friend_list extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
+        //친구목록 구현
         make_friendSet();
     }
 
+    // recyclerview 국룰
     public class MyAdapter_friend extends RecyclerView.Adapter<MyAdapter_friend.MyViewHolder> {
         private String[] textSet ={};
 
@@ -133,6 +137,7 @@ public class Friend_list extends AppCompatActivity {
                 Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
                 int friends = (int)snapshot.getChildrenCount();
 
+                // 친구 이미 있나 검사
                 while (child.hasNext()) {
                     if (child.next().getValue().equals(fname)) {
                         exist = true;
@@ -140,6 +145,7 @@ public class Friend_list extends AppCompatActivity {
                     }
                 }
 
+                // push로 중복넣기, 배열에 추가하고 동기화
                 if(!exist){
                     DB.push().setValue(fname);
                     friendSet[friends] = fname;
@@ -161,10 +167,12 @@ public class Friend_list extends AppCompatActivity {
         DB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // datasnapshot 정확히 모르겠는데 걍 쓰는중
                 Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
-                int friends = (int)snapshot.getChildrenCount();
+                int friends = (int)snapshot.getChildrenCount(); // 친구수
                 friends_num.setText("친구 2 / "+ friends);
 
+                // child 돌면서 value 가져와서 배열에 넣음
                 for(int i=0;i<friends;i++) {
                     friendSet[i] = (String)snapshot.getValue();
                     child.next();

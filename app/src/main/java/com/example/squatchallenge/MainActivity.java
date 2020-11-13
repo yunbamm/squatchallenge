@@ -31,23 +31,23 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout Quest;
-    private LinearLayout questlist;
+    //private LinearLayout Quest;
+    //private LinearLayout questlist;
     private LinearLayout friendlist;
     private LinearLayout Solo;
     private LinearLayout Random;
     private HorizontalScrollView scrollview;
     private TextView tv_result;
-    private TextView quest_name1;
+    private ImageView iv_profile;
+    /*private TextView quest_name1;
     private TextView quest_name2;
     private TextView quest_name3;
-    private ImageView iv_profile;
     private ImageView reroll1;
     private ImageView reroll2;
     private ImageView reroll3;
-    private int questcnt;
+    private int questcnt;*/
     Map<Integer,String> questSet = new HashMap<>();
-    quest[] today_quest = new quest[3];
+    //quest[] today_quest = new quest[3];
 
     //카메라 권한을 위해
     private int RESULT_PERMISSIONS = 100;
@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        quest q = new quest("",0,true);
-        q.setTodayQuest();
+        //quest q = new quest("",0,true);
+        //q.setTodayQuest();
 
         // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
         requestPermissionCamera();
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
         final String email = intent.getStringExtra("Email");        //구글이메일
 
-        tv_result = findViewById(R.id.tv_name);
+        /*tv_result = findViewById(R.id.tv_name);
         tv_result.setText(nickName);        //닉네임 text를 텍스트뷰에 세팅
         iv_profile = findViewById(R.id.iv_profile);
         Glide.with(this).load(photoUrl).into(iv_profile);       //프로필 url을 이미지뷰에 세팅
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 reroll3.setVisibility(View.INVISIBLE);
                 questcnt++;
             }
-        });
+        });*/
 
         friendlist = findViewById(R.id.Friendlist);
         friendlist.setOnClickListener(new View.OnClickListener() {
@@ -129,14 +129,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        iv_profile.setOnClickListener(new View.OnClickListener() {
+        /*iv_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), Mypage.class);
                 startActivity(intent);
                 intent.putExtra("name" , nickName);
             }
-        });
+        });*/
 
         Solo = findViewById(R.id.Solo);
         Random = findViewById(R.id.Random);
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class quest{
+    /*public class quest{
         String name;
         int num;
         Boolean clear;
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         questSet.put(7,"혼자하기\n3회");
         questSet.put(8,"랭커 영상\n1회 관전");
         questSet.put(0,"친선전 승리");
-    }
+    }*/
 
     //카메라라
     private boolean requestPermissionCamera() {
