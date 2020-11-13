@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -25,11 +27,15 @@ import android.view.SurfaceHolder;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -51,6 +57,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 
+import com.bumptech.glide.Glide;
 
 public class team_play extends AppCompatActivity implements Camera.PreviewCallback {
 
@@ -58,7 +65,11 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
     StorageReference childRef;
-    int tmp_index=0;
+    public ImageView iv_team;
+    public int save_index = 0;
+    public int read_index = 0;
+    public boolean write = false;
+    public boolean read = false;
 
     //카운트를 위해(시간)
     public TextView tv_timer;
@@ -162,11 +173,8 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
     Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
-
             tv_timer.setText(getTime());
-
             if (!game_end) handler.sendEmptyMessage(0);
-
         }
     };
 
@@ -191,7 +199,7 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
                         tv_count.setText(Integer.toString(count));
 
                         //10개 채웠으면 game_end!
-                        if (count >= 1) game_end = true;
+                        if (count >= 10) game_end = true;
                     }
                 }
                 //down
@@ -204,8 +212,8 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
             arr[1] = arr[2];
             arr[2] = -1;
         }
-
     }
+
     //total_count 와 speed_time update
     public void updateRecord() {
         //String[] s = {"/speed_time", "/total_count"};
@@ -220,6 +228,7 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
                     DB_speed.setValue(overTime);
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -230,11 +239,11 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
         DB_total.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                System.out.println(snapshot.getValue()+"!!!!!!!!!!!!!!!!!!!!!!");
                 long result = (long) snapshot.getValue();
                 result += count;
                 DB_total.setValue(result);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -243,19 +252,40 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
     }
 
     //frame을 storage에 저장하는 함수
-    public void saveFrame(byte[] data ){
-        childRef = storageRef.child(email + tmp_index + ".jpg");
-        tmp_index++;
+    public void saveFrame(byte[] data) {
+        childRef = storageRef.child(email + save_index + ".jpg");
         UploadTask uploadTask = childRef.putBytes(data);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                System.out.println("실패!!!!!!!!!!!!!!!!!!!!!!!!!");
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                System.out.println("성공!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+        });
+    }
+
+    //iv_team update 실시간 협력을 위해
+    public void printFrame() {
+        //우선 내화면을 iv_team에 넣어보자
+        //1.ONE_MEGABYTE에 이미지 byte를 저장
+        childRef = storageRef.child(email + save_index + ".jpg");
+        final long ONE_MEGABYTE = 1024 * 1024;
+        childRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                // Data for "images/island.jpg" is returns, use this as needed
+                //2. byte를 bitmap으로 변환
+                Bitmap team_bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                //3. iv_team update
+                iv_team = findViewById(R.id.iv_team);
+                iv_team.setImageBitmap(team_bitmap);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
             }
         });
     }
@@ -274,8 +304,8 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
             team_play.this.finish();      //액티비티 종료
         }
         //게임 끝이 아니고 게임이 시작됐다면(게임중이라면)
-        else if (game_start && !(mCamera == null)) {
-            Camera.Parameters params= mCamera.getParameters();
+        else if (game_start) {
+            Camera.Parameters params = mCamera.getParameters();
 
             int w = params.getPreviewSize().width;
             int h = params.getPreviewSize().height;
@@ -287,27 +317,7 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
             Matrix rotateMatrix = new Matrix();
             rotateMatrix.postRotate(90);
             bmp = Bitmap.createBitmap(bmp, 0, 0,
-                    bmp.getWidth(), bmp.getHeight(), rotateMatrix, false);
-
-            //요쯤에서 storage에 upload
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-            //saveFrame(data);
-            childRef = storageRef.child(email + tmp_index +".jpg");
-            tmp_index++;
-            UploadTask uploadTask = childRef.putBytes(data);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    System.out.println("실패!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    System.out.println("성공!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
-            });
+                    224, 224, rotateMatrix, false);
 
             //모델 적용을 위해
             float[][][][] inputs = new float[1][224][224][3];       //1 * width * height * RGB
@@ -331,6 +341,37 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
             else {
                 tv_result.setText("down");
                 determine(1);
+            }
+
+            if(!write) {
+                //요쯤에서 storage에 upload
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+                childRef = storageRef.child(email + save_index + ".jpg");
+                UploadTask uploadTask = childRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        write = true;
+                    }
+                });
+            }
+            if (write) {
+                //우선 내화면을 iv_team에 넣어보자
+                //1.ONE_MEGABYTE에 이미지 byte를 저장
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                childRef = storageRef.child(email + save_index + ".jpg");
+                iv_team = findViewById(R.id.iv_team);
+
+                Glide.with(this /* context */)
+                        .load(childRef)
+                        .into(iv_team);
+
             }
         }
     }
