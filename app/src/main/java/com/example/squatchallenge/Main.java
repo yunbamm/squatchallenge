@@ -1,8 +1,8 @@
 package com.example.squatchallenge;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Intent;
@@ -10,19 +10,17 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.google.android.gms.auth.api.Auth;
+import java.util.HashMap;
+import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class Main extends AppCompatActivity {
 
-
-    private LinearLayout friendlist;
-    private LinearLayout Solo;
-    private LinearLayout Random;
-    public LinearLayout Mypage;
-    public LinearLayout Quest;
-    /*private TextView quest_name1;
+    private TextView quest_name1;
     private TextView quest_name2;
     private TextView quest_name3;
     private ImageView reroll1;
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView reroll3;
     private int questcnt;
     Map<Integer,String> questSet = new HashMap<>();
-    quest[] today_quest = new quest[3];*/
+    Main.quest[] today_quest = new Main.quest[3];
 
     //카메라 권한을 위해
     private int RESULT_PERMISSIONS = 100;
@@ -39,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //quest q = new quest("",0,true);
-        //q.setTodayQuest();
+        setContentView(R.layout.quest_list);
+        Main.quest q = new Main.quest("",0,true);
+        q.setTodayQuest();
 
         // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
         requestPermissionCamera();
@@ -50,99 +49,61 @@ public class MainActivity extends AppCompatActivity {
         final String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
         final String email = intent.getStringExtra("Email");        //구글이메일
 
-        Quest = findViewById(R.id.Quest);
-        /*questlist = findViewById(R.id.questlist);
-        scrollview = findViewById(R.id.scrollview);
-        Quest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(questlist.getVisibility()==View.INVISIBLE) {
-                    questlist.setVisibility(View.VISIBLE);
-                    scrollview.setVisibility(View.INVISIBLE);
-                }
-                else{
-                    questlist.setVisibility(View.INVISIBLE);
-                    scrollview.setVisibility(View.VISIBLE);
-                }
-            }
+        LinearLayout Quest = findViewById(R.id.Quest);
+        LinearLayout questlist = findViewById(R.id.questlist);
+        LinearLayout main_linear = findViewById(R.id.main_linear);
+
+        Quest.setOnClickListener(view -> { // 퀘스트 누르면 위로 오버랩되게 처리
+            questlist.setVisibility(View.VISIBLE);
+            main_linear.setVisibility(View.INVISIBLE);
         });
+        questlist.setOnClickListener(view -> {
+            questlist.setVisibility(View.INVISIBLE);
+            main_linear.setVisibility(View.VISIBLE);
+        });
+
         reroll1 = findViewById(R.id.reroll1);
         reroll2 = findViewById(R.id.reroll2);
         reroll3 = findViewById(R.id.reroll3);
-        reroll1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(questcnt>=8) questcnt=0;
-                quest_name1.setText(questSet.get(questcnt));
-                reroll1.setVisibility(View.INVISIBLE);
-                questcnt++;
-            }
-        });
-        reroll2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(questcnt>=8) questcnt=0;
-                quest_name2.setText(questSet.get(questcnt));
-                reroll2.setVisibility(View.INVISIBLE);
-                questcnt++;
-            }
-        });
-        reroll3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(questcnt>=8) questcnt=0;
-                quest_name3.setText(questSet.get(questcnt));
-                reroll3.setVisibility(View.INVISIBLE);
-                questcnt++;
-            }
-        });*/
+        reroll1.setOnClickListener(view -> reroll(reroll1));
+        reroll2.setOnClickListener(view -> reroll(reroll2));
+        reroll3.setOnClickListener(view -> reroll(reroll3));
 
-        friendlist = findViewById(R.id.Friendlist);
-        friendlist.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent12 = new Intent(getApplicationContext(), Friend_list.class);
-                intent12.putExtra("Email" , email);
-                startActivity(intent12);
-            }
+        LinearLayout friendlist = findViewById(R.id.Friendlist); // 친구목록으로
+        friendlist.setOnClickListener(view -> {
+            Intent intent12 = new Intent(getApplicationContext(), Friend_list.class);
+            intent12.putExtra("Email" , email);
+            startActivity(intent12);
         });
 
-        Mypage.findViewById(R.id.Mypage);
-        Mypage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
-                startActivity(intent1);
-                intent1.putExtra("name" , nickName);
-                intent1.putExtra("photoUrl",photoUrl);
-            }
+        LinearLayout my_page = null;
+        my_page.findViewById(R.id.My_page); // 마이페이지로
+        my_page.setOnClickListener(view -> {
+            Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
+            startActivity(intent1);
+            intent1.putExtra("name" , nickName);
+            intent1.putExtra("photoUrl",photoUrl);
+            intent1.putExtra("Email",email);
         });
 
-        Solo = findViewById(R.id.Solo);
-        Random = findViewById(R.id.Random);
-        
+        LinearLayout solo = findViewById(R.id.Solo);
+        LinearLayout random = findViewById(R.id.Random);
+
         //솔로 플레이 버튼이 눌렸을때 (스피드모드)
-        Solo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
-                intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
-                startActivity(intent14);
-            }
+        solo.setOnClickListener(view -> {
+            Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
+            intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+            startActivity(intent14);
         });
         //랜덤(협력)
-        Random.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent13 = new Intent(getApplicationContext(), team_play.class);
-                intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
-                startActivity(intent13);
-            }
-
+        random.setOnClickListener(view -> {
+            Intent intent13 = new Intent(getApplicationContext(), team_play.class);
+            intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+            startActivity(intent13);
         });
     }
 
-    /*public class quest{
+    public class quest{
         String name;
         int num;
         Boolean clear;
@@ -159,13 +120,13 @@ public class MainActivity extends AppCompatActivity {
             this.clear=c;
         }
 
-        void setTodayQuest(){
+        void setTodayQuest(){ // 퀘스트 랜덤하게 선정
             setQuest();
             int ran = (int)(Math.random()*9);
             for(int i=0;i<3;i++){
                 if(ran>=8) ran=0;
                 else if(ran<=0) ran=0;
-                today_quest[i]= new quest(questSet.get(ran),ran+1,false);
+                today_quest[i]= new Main.quest(questSet.get(ran),ran+1,false);
                 questSet.remove(ran);
                 ran++;
             }
@@ -189,7 +150,30 @@ public class MainActivity extends AppCompatActivity {
         questSet.put(7,"혼자하기\n3회");
         questSet.put(8,"랭커 영상\n1회 관전");
         questSet.put(0,"친선전 승리");
-    }*/
+    }
+
+    public void reroll(ImageView imageView){ // 리롤하면 버튼 사라지고 퀘스트 교체
+        imageView.setOnClickListener(view -> {
+            if(imageView == findViewById(R.id.reroll1)) {
+                if(questcnt>=8) questcnt=0;
+                quest_name1.setText(questSet.get(questcnt));
+                reroll1.setVisibility(View.INVISIBLE);
+                questcnt++;
+            }
+            else if(imageView == findViewById(R.id.reroll2)) {
+                if(questcnt>=8) questcnt=0;
+                quest_name2.setText(questSet.get(questcnt));
+                reroll2.setVisibility(View.INVISIBLE);
+                questcnt++;
+            }
+            else {
+                if(questcnt>=8) questcnt=0;
+                quest_name3.setText(questSet.get(questcnt));
+                reroll3.setVisibility(View.INVISIBLE);
+                questcnt++;
+            }
+        });
+    }
 
     //카메라라
     private boolean requestPermissionCamera() {
@@ -198,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
-                ActivityCompat.requestPermissions(MainActivity.this,
+                ActivityCompat.requestPermissions(Main.this,
                         new String[]{Manifest.permission.CAMERA},
                         RESULT_PERMISSIONS);
 

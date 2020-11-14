@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fadingEdge="none"
-    android:layerType="none"
-    tools:context=".MainActivity">
-
+    tools:context=".Main">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,87 +17,104 @@
             app:layout_constraintTop_toTopOf="parent"
             android:background="@drawable/name">
         </ImageView>
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            android:padding="10dp"
+            android:layout_gravity="center">
+            <include
+                android:id="@+id/questlist"
+                layout="@layout/quest_list"
+                android:layout_centerInParent="true"
+                android:visibility="invisible"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
             <LinearLayout
-                android:id="@+id/Mypage"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center"
-                android:background="@drawable/buttonshape3">
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    app:srcCompat="@drawable/me1_1" />
-                <TextView
-                    android:layout_width="130dp"
-                    android:layout_height="40dp"
+                android:id="@+id/main_linear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:id="@+id/My_page"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
                     android:layout_gravity="center"
-                    android:fadeScrollbars="true"
-                    android:textStyle="bold"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="마 이 페 이 지"
-                    android:background="#575757"
-                    android:textColor="#FFE607"
-                    android:textSize="20sp" />
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/Quest"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center"
-                android:background="@drawable/buttonshape3">
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    app:srcCompat="@drawable/quest2_1" />
-                <TextView
-                    android:layout_width="130dp"
-                    android:layout_height="40dp"
+                    android:background="@drawable/buttonshape3">
+                    <ImageView
+                        android:layout_width="45dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        app:srcCompat="@drawable/me1_1" />
+                    <TextView
+                        android:layout_width="130dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:fadeScrollbars="true"
+                        android:textStyle="bold"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="마 이 페 이 지"
+                        android:background="#575757"
+                        android:textColor="#FFE607"
+                        android:textSize="20sp" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/Quest"
+                    android:orientation="horizontal"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
                     android:layout_gravity="center"
-                    android:background="#575757"
-                    android:textStyle="bold"
-                    android:textColor="#FFE607"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="퀘 스 트"
-                    android:textSize="20sp" />
+                    android:background="@drawable/buttonshape3">
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        app:srcCompat="@drawable/quest2_1" />
+                    <TextView
+                        android:layout_width="130dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:background="#575757"
+                        android:textStyle="bold"
+                        android:textColor="#FFE607"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="퀘 스 트"
+                        android:textSize="20sp" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/Friendlist"
+                    android:orientation="horizontal"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/buttonshape3">
+                    <ImageView
+                        android:layout_width="45dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        app:srcCompat="@drawable/friends1_1" />
+                    <TextView
+                        android:layout_width="130dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="#575757"
+                        android:textStyle="bold"
+                        android:textColor="#FFE607"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:text="친 구 목 록"
+                        android:textSize="20sp" />
+                </LinearLayout>
             </LinearLayout>
-            <LinearLayout
-                android:id="@+id/Friendlist"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center"
-                android:background="@drawable/buttonshape3">
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    app:srcCompat="@drawable/friends1_1" />
-                <TextView
-                    android:layout_width="130dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="#575757"
-                    android:textStyle="bold"
-                    android:textColor="#FFE607"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="친 구 목 록"
-                    android:textSize="20sp" />
-            </LinearLayout>
-        </LinearLayout>
+        </RelativeLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
@@ -166,4 +179,5 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

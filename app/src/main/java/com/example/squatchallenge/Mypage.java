@@ -8,7 +8,13 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -18,6 +24,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.Iterator;
 
 public class Mypage extends AppCompatActivity {
     private LinearLayout achiv;
@@ -32,6 +40,7 @@ public class Mypage extends AppCompatActivity {
     private TextView tv_name;
     private TextView tv_myach;
     private ImageView iv_profile;
+    DatabaseReference DB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +52,8 @@ public class Mypage extends AppCompatActivity {
         Intent intent = getIntent();
         final String nickName = intent.getStringExtra("name");
         final String photoUrl = intent.getStringExtra("photoUrl");
+        final String email = intent.getStringExtra("Email");
+
         tv_name = findViewById(R.id.tv_name);
         tv_name.setText(nickName);
         tv_myach = findViewById(R.id.tv_myach);
@@ -56,6 +67,43 @@ public class Mypage extends AppCompatActivity {
         ach1.setOnClickListener(view -> select_myach(ach1));
         ach2.setOnClickListener(view -> select_myach(ach2));
         ach3.setOnClickListener(view -> select_myach(ach3));
+
+        rec1 = findViewById(R.id.rec1);
+        rec2 = findViewById(R.id.rec2);
+        rec3 = findViewById(R.id.rec3);
+        rec1.setOnClickListener(view -> {
+            DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/total_count");
+            DB.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    long c = (long) snapshot.getValue();
+                    String cnt = c + "개";
+                    rec1.setText(cnt);
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        });
+        rec2.setOnClickListener(view -> {
+            DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/speed_time");
+            DB.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    long t = (long) snapshot.getValue();
+                    String time = t + "초";
+                    rec2.setText(time);
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        });
+        rec3.setOnClickListener(view -> {
+            String stage;
+            stage = "스테이지\n3";
+            rec3.setText(stage);
+        });
     }
 
     public void select_myach(Button button){ // 업적 눌렀을때 눌린 버튼만 강조 및 내 업적으로 설정

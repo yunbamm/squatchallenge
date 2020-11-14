@@ -149,7 +149,7 @@ import java.util.Map;
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){    //로그인이 성공했으면
                             Toast.makeText(LoginActivity.this , "로그인 성공",Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(getApplicationContext(), Main.class);
+                            Intent intent = new Intent(getApplicationContext(), Mypage.class);
                             intent.putExtra("name" , account.getDisplayName());         //key값 :Nickname
                             intent.putExtra("photoUrl",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환
                             intent.putExtra("Email",parsingEmail(account.getEmail()));
