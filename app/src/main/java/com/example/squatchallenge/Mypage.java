@@ -28,7 +28,6 @@ import android.widget.TextView;
 import java.util.Iterator;
 
 public class Mypage extends AppCompatActivity {
-    private LinearLayout achiv;
     private LinearLayout to_setting;
     private LinearLayout to_cuscen;
     private Button ach1;
