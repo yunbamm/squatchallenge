@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".team_play"></activity>
+        <activity android:name=".Main"></activity>
+        <activity android:name=".team_play" />
         <activity android:name=".solo_speed_play" />
         <activity
             android:name=".Mypage"
@@ -29,7 +30,6 @@
             android:name=".Friend_list"
             android:label="@string/title_activity_friend_list"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".MainActivity" />
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
