@@ -1,12 +1,8 @@
 package com.example.squatchallenge;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -15,18 +11,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.Iterator;
 
 public class Mypage extends AppCompatActivity {
     private LinearLayout to_setting;
@@ -116,7 +107,7 @@ public class Mypage extends AppCompatActivity {
 
         to_cuscen.findViewById(R.id.to_cuscen);
         to_cuscen.setOnClickListener(view -> { // 원래 고객센터 팝업인데 지금 스테이지로 해둠
-            Intent intent1 = new Intent(getApplicationContext(), stage.class);
+            Intent intent1 = new Intent(getApplicationContext(), stage1.class);
             startActivity(intent1);
             intent1.putExtra("name" , nickName);
             intent1.putExtra("photoUrl",photoUrl);

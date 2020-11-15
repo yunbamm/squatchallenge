@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".stage1">
+    tools:context=".stage3">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,29 +15,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight=".03">
-        </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight=".12"
-            android:weightSum="1">
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".25"/>
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:background="@drawable/stage_line2"/>
-            <ImageView
-                android:id="@+id/upto_stage2"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".25"
-                android:background="@drawable/up1"/>
+            android:layout_weight=".08">
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,8 +26,8 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="스쿼트\n30회"
-                android:textSize="24sp"
+                android:text="5분안에\n스쿼트\n130회"
+                android:textSize="22sp"
                 android:padding="5dp"
                 android:gravity="center"
                 android:layout_marginLeft="15dp"
@@ -62,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/dot1_3"
                 android:layout_marginLeft="5dp"
-                android:text="3"
+                android:text="9"
                 android:textSize="45sp"
                 android:fontFamily="@font/kanit_black"
                 android:gravity="center"
@@ -73,7 +51,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
-                android:background="@drawable/stage_img3"/>
+                android:padding="40dp"
+                android:background="@drawable/stage_img7"/>
         </LinearLayout>
         <LinearLayout
             android:orientation="horizontal"
@@ -101,15 +80,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
-                android:background="@drawable/stage_img1"
+                android:background="@drawable/stage_img9"
                 android:padding="20dp"/>
             <TextView
-                android:id="@+id/stage2"
+                android:id="@+id/stage8"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/dot1_3"
                 android:layout_weight=".25"
-                android:text="2"
+                android:text="8"
                 android:textSize="45sp"
                 android:fontFamily="@font/kanit_black"
                 android:gravity="center"
@@ -127,9 +106,9 @@
                 android:background="@drawable/buttonshape3"
                 android:gravity="center"
                 android:padding="5dp"
-                android:text="스쿼트\n20회"
+                android:text="3분안에\n스쿼트\n90회"
                 android:textColor="#FFE607"
-                android:textSize="24sp"
+                android:textSize="22sp"
                 app:layout_constraintEnd_toEndOf="parent" />
         </LinearLayout>
         <LinearLayout
@@ -157,8 +136,8 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="스쿼트\n10회"
-                android:textSize="24sp"
+                android:text="3분안에\n스쿼트\n80회"
+                android:textSize="22sp"
                 android:padding="5dp"
                 android:gravity="center"
                 android:layout_marginLeft="15dp"
@@ -167,12 +146,11 @@
                 android:background="@drawable/buttonshape3"
                 android:layout_weight=".25"/>
             <TextView
-                android:id="@+id/stage1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/dot1_3"
                 android:layout_weight=".25"
-                android:text="1"
+                android:text="7"
                 android:textSize="45sp"
                 android:fontFamily="@font/kanit_black"
                 android:gravity="center"
@@ -184,12 +162,34 @@
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
                 android:padding="40dp"
-                android:background="@drawable/stage_img2"/>
+                android:background="@drawable/stage_img8"/>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".12"
+            android:weightSum="1">
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/stage_line1"/>
+            <ImageView
+                android:id="@+id/downto_stage2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight=".25"
+                android:background="@drawable/down1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight=".1">
+            android:layout_weight=".05">
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
