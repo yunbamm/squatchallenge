@@ -15,6 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -29,7 +30,7 @@ import java.util.Iterator;
 
 public class Mypage extends AppCompatActivity {
     private LinearLayout to_setting;
-    private LinearLayout to_cuscen;
+    private ImageView to_cuscen;
     private Button ach1;
     private Button ach2;
     private Button ach3;
@@ -70,7 +71,7 @@ public class Mypage extends AppCompatActivity {
         rec1 = findViewById(R.id.rec1);
         rec2 = findViewById(R.id.rec2);
         rec3 = findViewById(R.id.rec3);
-        rec1.setOnClickListener(view -> {
+        rec1.setOnClickListener(view -> { // 각 기록 누르면 db가서 값 가져옴
             DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/total_count");
             DB.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -102,6 +103,24 @@ public class Mypage extends AppCompatActivity {
             String stage;
             stage = "스테이지\n3";
             rec3.setText(stage);
+        });
+
+        to_setting.findViewById(R.id.to_setting);
+        to_setting.setOnClickListener(view -> { // 원래 설정으로 이동해야 되는데 지금 친구목록으로 해둠
+            Intent intent1 = new Intent(getApplicationContext(), Friend_list.class);
+            startActivity(intent1);
+            intent1.putExtra("name" , nickName);
+            intent1.putExtra("photoUrl",photoUrl);
+            intent1.putExtra("Email",email);
+        });
+
+        to_cuscen.findViewById(R.id.to_cuscen);
+        to_cuscen.setOnClickListener(view -> { // 원래 고객센터 팝업인데 지금 스테이지로 해둠
+            Intent intent1 = new Intent(getApplicationContext(), stage.class);
+            startActivity(intent1);
+            intent1.putExtra("name" , nickName);
+            intent1.putExtra("photoUrl",photoUrl);
+            intent1.putExtra("Email",email);
         });
     }
 

@@ -29,6 +29,7 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
+                android:padding="5dp"
                 android:background="@drawable/buttonshape4"
                 android:layout_gravity="center_vertical"
                 app:layout_constraintEnd_toStartOf="@+id/tv_name"
@@ -270,7 +271,6 @@
                     android:textSize="32sp"/>
             </LinearLayout>
             <LinearLayout
-                android:id="@+id/to_cuscen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -286,6 +286,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
                 <ImageView
+                    android:id="@+id/to_cuscen"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginLeft="9dp"

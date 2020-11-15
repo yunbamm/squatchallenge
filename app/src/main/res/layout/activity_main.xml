@@ -139,9 +139,10 @@
                     android:textStyle="bold"
                     android:layout_marginTop="5dp"
                     android:text="S O L O"
+                    android:fontFamily="@font/kanit_black"
                     android:textColor="#FFE607"
                     android:gravity="center_horizontal"
-                    android:textSize="24sp"/>
+                    android:textSize="26sp"/>
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -167,9 +168,10 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="5dp"
                     android:text="@string/cooperate"
+                    android:fontFamily="@font/kanit_black"
                     android:textColor="#FFE607"
                     android:gravity="center"
-                    android:textSize="24sp"/>
+                    android:textSize="26sp"/>
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
