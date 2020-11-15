@@ -98,14 +98,14 @@
                 app:layout_constraintStart_toStartOf="parent">
 
                 <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
                     android:layout_marginLeft="9dp"
                     android:background="@drawable/crown3_1"
                     android:layout_gravity="center_vertical"/>
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="50dp"
+                    android:layout_height="45dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginLeft="10dp"
                     android:text="@string/achievement"
@@ -176,13 +176,13 @@
                 app:layout_constraintStart_toStartOf="parent">
                     <ImageView
                         android:layout_width="45dp"
-                        android:layout_height="50dp"
+                        android:layout_height="45dp"
                         android:layout_marginLeft="9dp"
                         android:background="@drawable/myrecord1_1"
                         android:layout_gravity="center_vertical"/>
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="50dp"
+                        android:layout_height="45dp"
                         android:layout_marginStart="10dp"
                         android:layout_marginLeft="10dp"
                         android:text="@string/record"
@@ -253,14 +253,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
                 <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
                     android:layout_marginLeft="9dp"
                     android:background="@drawable/setting1_2"
                     android:layout_gravity="center_vertical"/>
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="50dp"
+                    android:layout_height="45dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginLeft="10dp"
                     android:text="@string/setting"
@@ -287,14 +287,14 @@
                 app:layout_constraintStart_toStartOf="parent">
                 <ImageView
                     android:id="@+id/to_cuscen"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
                     android:layout_marginLeft="9dp"
                     android:background="@drawable/cuscen1_1"
                     android:layout_gravity="center_vertical"/>
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="50dp"
+                    android:layout_height="45dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginLeft="10dp"
                     android:text="@string/customer_center"
