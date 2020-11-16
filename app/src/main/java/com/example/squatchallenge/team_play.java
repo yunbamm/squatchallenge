@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import com.bumptech.glide.Glide;
 
@@ -68,8 +69,8 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
     public ImageView iv_team;
     public int save_index = 0;
     public int read_index = 0;
-    public boolean write = false;
-    public boolean read = false;
+    public int frame_count = 0;
+    public boolean check = false;           //false(upload) , true(보여주기)
 
     //카운트를 위해(시간)
     public TextView tv_timer;
@@ -175,26 +176,7 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
         public void handleMessage(@NonNull Message msg) {
             tv_timer.setText(getTime());
 
-            //우선 내화면을 iv_team에 넣어보자
-            //1.ONE_MEGABYTE에 이미지 byte를 저장
-            childRef = storageRef.child(email + save_index + ".jpg");
-            final long ONE_MEGABYTE = 1024 * 1024;
-            childRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    // Data for "images/island.jpg" is returns, use this as needed
-                    //2. byte를 bitmap으로 변환
-                    Bitmap team_bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    //3. iv_team update
-                    iv_team = findViewById(R.id.iv_team);
-                    iv_team.setImageBitmap(team_bitmap);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                }
-            });
+
             if (!game_end) handler.sendEmptyMessage(0);
         }
     };
@@ -272,48 +254,11 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
         });
     }
 
-    //frame을 storage에 저장하는 함수
-    public void saveFrame(byte[] data) {
-        childRef = storageRef.child(email + save_index + ".jpg");
-        UploadTask uploadTask = childRef.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-            }
-        });
-    }
-
-    //iv_team update 실시간 협력을 위해
-    public void printFrame() {
-        //우선 내화면을 iv_team에 넣어보자
-        //1.ONE_MEGABYTE에 이미지 byte를 저장
-        childRef = storageRef.child(email + save_index + ".jpg");
-        final long ONE_MEGABYTE = 1024 * 1024;
-        childRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                // Data for "images/island.jpg" is returns, use this as needed
-                //2. byte를 bitmap으로 변환
-                Bitmap team_bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                //3. iv_team update
-                iv_team = findViewById(R.id.iv_team);
-                iv_team.setImageBitmap(team_bitmap);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-            }
-        });
-    }
-
     //Frame마다 처리
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
+        frame_count++;
+
         //결과값 출력을 위해
         tv_result = findViewById(R.id.tv_result);
         tv_count = findViewById(R.id.tv_count);
@@ -327,11 +272,11 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
         //게임 끝이 아니고 게임이 시작됐다면(게임중이라면)
         else if (game_start) {
             Camera.Parameters params = mCamera.getParameters();
-
             int w = params.getPreviewSize().width;
             int h = params.getPreviewSize().height;
             final int[] rgb = decodeYUV420SP(bytes, w, h);
             Bitmap bmp = Bitmap.createBitmap(rgb, w, h, Bitmap.Config.ARGB_8888);
+
 
             //모델적용을 위해 resize
             bmp = Bitmap.createScaledBitmap(bmp, 224, 224, false);
@@ -340,21 +285,53 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
             bmp = Bitmap.createBitmap(bmp, 0, 0,
                     224, 224, rotateMatrix, false);
 
-            //요쯤에서 storage에 upload
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-            childRef = storageRef.child(email + save_index + ".jpg");
-            UploadTask uploadTask = childRef.putBytes(data);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                }
-            });
+
+            if(frame_count%2==1) {
+                //홀수 upload
+                //요쯤에서 storage에 upload
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+                childRef = storageRef.child(email + save_index + ".jpg");
+                UploadTask uploadTask = childRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    //저장된 frame++ , index++
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        save_index++;
+                    }
+                });
+            }
+            else {
+                //짝수 read
+                //1.ONE_MEGABYTE에 이미지 byte를 저장
+                childRef = storageRef.child(email + read_index + ".jpg");
+                final long ONE_MEGABYTE = 1024 * 1024;
+                childRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        //2. byte를 bitmap으로 변환
+                        Bitmap team_bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        //3. iv_team update (회전후 update)
+//                            Matrix rotateMatrix = new Matrix();
+//                            rotateMatrix.postRotate(180);
+//                            team_bitmap = Bitmap.createBitmap(team_bitmap, 0, 0,
+//                                    team_bitmap.getWidth(), team_bitmap.getHeight(), rotateMatrix, false);
+                        iv_team = findViewById(R.id.iv_team);
+                        iv_team.setImageBitmap(team_bitmap);
+                        read_index++;
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                    }
+                });
+            }
             //모델 적용을 위해
             float[][][][] inputs = new float[1][224][224][3];       //1 * width * height * RGB
             float[][] outputs = new float[1][2];
