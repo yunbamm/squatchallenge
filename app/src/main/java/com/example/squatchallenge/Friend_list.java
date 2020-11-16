@@ -45,7 +45,7 @@ public class Friend_list extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     DatabaseReference DB;
     String email="";
-    String[] friendSet = {"친구를 추가하세요"};
+    String[] friendSet = {"친구를\n추가하세요"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

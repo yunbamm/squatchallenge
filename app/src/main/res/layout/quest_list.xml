@@ -27,6 +27,7 @@
                 android:layout_height="55dp"
                 android:textStyle="bold"
                 android:textSize="22sp"
+                android:textColor="#FFE607"
                 android:gravity="center"
                 android:layout_gravity="center" />
             <ImageView
@@ -54,6 +55,7 @@
                 android:layout_height="55dp"
                 android:textStyle="bold"
                 android:textSize="22sp"
+                android:textColor="#FFE607"
                 android:gravity="center"
                 android:layout_gravity="center" />
             <ImageView
@@ -80,6 +82,7 @@
                 android:layout_width="115dp"
                 android:layout_height="55dp"
                 android:textStyle="bold"
+                android:textColor="#FFE607"
                 android:textSize="22sp"
                 android:gravity="center"
                 android:layout_gravity="center" />

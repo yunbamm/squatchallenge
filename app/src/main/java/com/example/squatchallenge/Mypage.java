@@ -96,23 +96,23 @@ public class Mypage extends AppCompatActivity {
             rec3.setText(stage);
         });
 
-        to_setting.findViewById(R.id.to_setting);
-        to_setting.setOnClickListener(view -> { // 원래 설정으로 이동해야 되는데 지금 친구목록으로 해둠
-            Intent intent1 = new Intent(getApplicationContext(), Friend_list.class);
-            startActivity(intent1);
-            intent1.putExtra("name" , nickName);
-            intent1.putExtra("photoUrl",photoUrl);
-            intent1.putExtra("Email",email);
-        });
-
-        to_cuscen.findViewById(R.id.to_cuscen);
-        to_cuscen.setOnClickListener(view -> { // 원래 고객센터 팝업인데 지금 스테이지로 해둠
-            Intent intent1 = new Intent(getApplicationContext(), stage1.class);
-            startActivity(intent1);
-            intent1.putExtra("name" , nickName);
-            intent1.putExtra("photoUrl",photoUrl);
-            intent1.putExtra("Email",email);
-        });
+//        to_setting.findViewById(R.id.to_setting);
+//        to_setting.setOnClickListener(view -> { // 원래 설정으로 이동해야 되는데 지금 친구목록으로 해둠
+//            Intent intent1 = new Intent(getApplicationContext(), Friend_list.class);
+//            startActivity(intent1);
+//            intent1.putExtra("name" , nickName);
+//            intent1.putExtra("photoUrl",photoUrl);
+//            intent1.putExtra("Email",email);
+//        });
+//
+//        to_cuscen.findViewById(R.id.to_cuscen);
+//        to_cuscen.setOnClickListener(view -> { // 원래 고객센터 팝업인데 지금 스테이지로 해둠
+//            Intent intent1 = new Intent(getApplicationContext(), stage1.class);
+//            startActivity(intent1);
+//            intent1.putExtra("name" , nickName);
+//            intent1.putExtra("photoUrl",photoUrl);
+//            intent1.putExtra("Email",email);
+//        });
     }
 
     public void select_myach(Button button){ // 업적 눌렀을때 눌린 버튼만 강조 및 내 업적으로 설정

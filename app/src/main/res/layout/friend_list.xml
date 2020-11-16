@@ -6,35 +6,39 @@
 
     <LinearLayout
         android:id="@+id/friend"
-        android:layout_width="375dp"
-        android:layout_height="75dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="10dp"
+        android:padding="10dp"
+        android:weightSum="1"
         android:background="@drawable/buttonshape3">
         <ImageView
             android:id="@+id/friend_img"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".15"
             android:layout_marginLeft="5dp"
             android:gravity="center_horizontal|center_vertical"
             android:layout_gravity="center_vertical"
             android:src="@drawable/friends1_1"/>
         <TextView
             android:id="@+id/friend_name"
-            android:layout_width="180dp"
-            android:layout_height="60dp"
+            android:layout_width="0dp"
+            android:layout_weight=".55"
+            android:layout_height="wrap_content"
             android:text="I D"
             android:textStyle="bold"
             android:gravity="center_horizontal|center_vertical"
             android:textColor="#FFE607"
             android:layout_gravity="center_vertical"
-            android:textSize="26sp"/>
-
+            android:textSize="24sp"/>
         <Button
             android:id="@+id/vs_friend"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".15"
             android:text="협력"
             android:textStyle="bold"
             android:layout_marginLeft="10dp"
@@ -45,8 +49,9 @@
 
         <Button
             android:id="@+id/delete_friend"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".15"
             android:layout_marginLeft="7dp"
             android:gravity="center_horizontal|center_vertical"
             android:text="삭제"

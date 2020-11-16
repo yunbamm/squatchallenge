@@ -37,7 +37,6 @@ public class Main extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setContentView(R.layout.quest_list);
         Main.quest q = new Main.quest("",0,true);
         q.setTodayQuest();
 
@@ -77,7 +76,7 @@ public class Main extends AppCompatActivity {
         });
 
         LinearLayout my_page = null;
-        my_page.findViewById(R.id.My_page); // 마이페이지로
+        my_page = findViewById(R.id.My_page); // 마이페이지로
         my_page.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
             startActivity(intent1);
