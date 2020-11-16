@@ -117,7 +117,6 @@ public class team_play extends AppCompatActivity implements Camera.PreviewCallba
         //모델 로드
         tflite = getTfliteInterpreter("model.tflite");
 
-
         // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
         requestPermissionCamera();
 

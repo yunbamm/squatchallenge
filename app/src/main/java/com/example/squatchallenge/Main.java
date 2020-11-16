@@ -20,6 +20,7 @@ import java.util.Map;
 
 public class Main extends AppCompatActivity {
 
+    private LinearLayout my_page;
     private TextView quest_name1;
     private TextView quest_name2;
     private TextView quest_name3;
@@ -75,7 +76,6 @@ public class Main extends AppCompatActivity {
             startActivity(intent12);
         });
 
-        LinearLayout my_page = null;
         my_page = findViewById(R.id.My_page); // 마이페이지로
         my_page.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), Mypage.class);

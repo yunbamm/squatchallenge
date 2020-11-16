@@ -176,7 +176,7 @@ public class solo_speed_play extends AppCompatActivity implements Camera.Preview
                         tv_count.setText(Integer.toString(count));
 
                         //10개 채웠으면 game_end!
-                        if (count >= 1) game_end = true;
+                        if (count >= 3) game_end = true;
                     }
                 }
                 //down

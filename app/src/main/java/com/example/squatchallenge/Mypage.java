@@ -64,7 +64,6 @@ public class Mypage extends AppCompatActivity {
         rec3 = findViewById(R.id.rec3);
         rec1.setOnClickListener(view -> { // 각 기록 누르면 db가서 값 가져옴
             DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/total_count");
-
             DB.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -83,7 +82,12 @@ public class Mypage extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     long t = (long) snapshot.getValue();
-                    String time = t + "초";
+                    long m = t / 1000 / 60;
+                    long s = (t / 1000) % 60;
+                    long ms = t % 1000;
+
+                    String recTime = String.format("%d:%02d:%03d", m, s, ms);
+                    String time = recTime + "초";
                     rec2.setText(time);
                 }
                 @Override
@@ -121,7 +125,7 @@ public class Mypage extends AppCompatActivity {
             if(button == findViewById(R.id.ach1)) {
                 button.setTextColor(0xAA575757);
                 button.setBackgroundColor(0xAAFFE607);
-                tv_myach.setText(button.getText());
+                tv_myach.setText("매 일 노 력 하 는 자");
                 button.setBackgroundResource(R.drawable.buttonshape4);
                 ach2.setTextColor(0xAAFFE607);
                 ach2.setBackgroundColor(0xAA575757);

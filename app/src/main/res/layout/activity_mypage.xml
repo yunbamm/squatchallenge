@@ -69,10 +69,6 @@
                     android:textColor="#575757"
                     android:textStyle="bold"
                     android:textSize="24sp" />
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight=".1"/>
                 <TextView
                     android:id="@+id/tv_name"
                     android:layout_width="match_parent"
@@ -84,11 +80,11 @@
                     android:text="I D"
                     android:textColor="#575757"
                     android:textStyle="bold"
-                    android:textSize="34sp" />
+                    android:textSize="30sp" />
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight=".05"/>
+                    android:layout_weight=".15"/>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
