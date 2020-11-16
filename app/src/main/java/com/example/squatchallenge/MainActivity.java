@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent12);
         });
 
-        Mypage.findViewById(R.id.Mypage);
+        Mypage = findViewById(R.id.Mypage);
         Mypage.setOnClickListener(view -> {
            Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
            startActivity(intent1);
