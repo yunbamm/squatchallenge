@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ public class Friend_list extends AppCompatActivity {
 
     private Button add_friend;
     private Button add_friend_button;
-    private View add_friend_chang;
+    private LinearLayout add_friend_chang;
+    private LinearLayout friend_linear;
     private TextView friends_num;
     RecyclerView recyclerView;
     RecyclerView.Adapter adapter;
@@ -59,28 +61,23 @@ public class Friend_list extends AppCompatActivity {
         email = intent.getStringExtra("Email");
         DB = FirebaseDatabase.getInstance().getReference("users").child(email);
 
-        add_friend_chang = findViewById(R.id.add_friend_chang);
-        add_friend_chang.setVisibility(View.INVISIBLE);
-        add_friend_button = findViewById(R.id.add_friend_button);
-        add_friend = findViewById(R.id.add_friend);
-        friends_num = findViewById(R.id.friends_num);
+        add_friend_button = findViewById(R.id.add_friend_button); // 메인의 친구추가 버튼
+        friend_linear = findViewById(R.id.friend_linear); // 메인의 상단layer
+        add_friend_chang = findViewById(R.id.add_friend_chang); // 친구추가 창
+        add_friend = findViewById(R.id.add_friend); // 친구추가 창의 친구추가 버튼
+        friends_num = findViewById(R.id.friends_num); // 친구 수
 
-        add_friend_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                add_friend_chang.setVisibility(View.VISIBLE);
-            }
+        add_friend_button.setOnClickListener(view -> { // 친구추가 누르면 친구추가 창 뜸
+            add_friend_chang.setVisibility(View.VISIBLE);
+            friend_linear.setVisibility(View.INVISIBLE);
         });
 
-
-        add_friend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditText add_friend_name = findViewById(R.id.add_friend_name);
-                String _add_friend_name = add_friend_name.getText().toString();
-                newfriend(_add_friend_name);
-                add_friend_chang.setVisibility(View.INVISIBLE);
-            }
+        add_friend.setOnClickListener(view -> { // 친구추가 창에서 아이디 치고 친구추가 누르면
+            EditText add_friend_name = findViewById(R.id.add_friend_name); // 화면 돌아오면서 추가
+            String _add_friend_name = add_friend_name.getText().toString();
+            newfriend(_add_friend_name);
+            add_friend_chang.setVisibility(View.INVISIBLE);
+            friend_linear.setVisibility(View.VISIBLE);
         });
         // recyclerview 국룰
         recyclerView = findViewById(R.id.list_friend);
@@ -180,7 +177,6 @@ public class Friend_list extends AppCompatActivity {
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
         adapter = new MyAdapter_friend(friendSet);

@@ -18,5 +18,11 @@ public class stage3 extends AppCompatActivity {
             Intent intent13 = new Intent(getApplicationContext(), stage2.class);
             startActivity(intent13);
         });
+
+        ImageView home3 = findViewById(R.id.home3);
+        home3.setOnClickListener(view -> {
+            Intent intent14 = new Intent(getApplicationContext(), Main.class);
+            startActivity(intent14);
+        });
     }
 }

@@ -79,18 +79,19 @@ public class Main extends AppCompatActivity {
         my_page = findViewById(R.id.My_page); // 마이페이지로
         my_page.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
-            startActivity(intent1);
             intent1.putExtra("name" , nickName);
             intent1.putExtra("photoUrl",photoUrl);
             intent1.putExtra("Email",email);
+            startActivity(intent1);
+
         });
 
         LinearLayout solo = findViewById(R.id.Solo);
         LinearLayout random = findViewById(R.id.Random);
 
-        //솔로 플레이 버튼이 눌렸을때 (스피드모드)
+        //솔로 플레이 버튼이 눌렸을때 (모드 선택화면)
         solo.setOnClickListener(view -> {
-            Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
+            Intent intent14 = new Intent(getApplicationContext(), Solo_selection.class);
             intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
             startActivity(intent14);
         });
