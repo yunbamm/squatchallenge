@@ -22,6 +22,7 @@
             android:weightSum="1"
             android:orientation="horizontal"
             android:background="#FFE607"
+            android:paddingBottom="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
             <ImageView
@@ -47,26 +48,36 @@
                 android:layout_weight=".65"
                 android:orientation="vertical"
                 android:layout_marginTop="10dp"
+                android:weightSum="1"
                 android:paddingRight="15dp"
                 android:paddingLeft="15dp"
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/buttonshape4">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".05"/>
                 <TextView
                     android:id="@+id/tv_myach"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_marginTop="15dp"
                     android:gravity="center"
+                    android:layout_weight=".4"
                     android:layout_gravity="center"
                     android:text="매 일 노 력 하 는 자"
                     android:textColor="#575757"
                     android:textStyle="bold"
                     android:textSize="24sp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".1"/>
                 <TextView
                     android:id="@+id/tv_name"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="0dp"
+                    android:layout_weight=".4"
                     android:layout_marginBottom="5dp"
                     android:gravity="center"
                     android:layout_gravity="center"
@@ -74,6 +85,10 @@
                     android:textColor="#575757"
                     android:textStyle="bold"
                     android:textSize="34sp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".05"/>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -89,237 +104,332 @@
             app:layout_constraintStart_toStartOf="parent"
             android:gravity="center_vertical">
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight=".12"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="5dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:layout_marginRight="8dp"
                 android:orientation="horizontal"
-                android:background="@drawable/buttonshape3"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
+                android:weightSum="1">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"
+                    android:weightSum="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:layout_marginRight="8dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/buttonshape3"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".35"
+                        android:layout_marginLeft="9dp"
+                        android:background="@drawable/crown3_1"
+                        android:layout_gravity="center_vertical"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".65"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/achievement"
+                        android:textColor="#FFE607"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:textSize="32sp"/>
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"/>
+                </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".25">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:weightSum="1">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".02"/>
+                    <Button
+                        android:id="@+id/ach1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".3"
+                        android:padding="5dp"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center"
+                        android:text="매 일 노 력\n하 는 자"
+                        android:textColor="#575757"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="24sp"
+                        android:background="@drawable/buttonshape4">
+                    </Button>
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".03"/>
 
+                    <Button
+                        android:id="@+id/ach2"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop="5dp"
+                        android:layout_weight=".3"
+                        android:background="@drawable/buttonshape3"
+                        android:gravity="center"
+                        android:padding="5dp"
+                        android:text="스 쿼 트\n중 수"
+                        android:textColor="#FFE607"
+                        android:textSize="24sp"></Button>
+
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".03"/>
+                    <Button
+                        android:id="@+id/ach3"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".3"
+                        android:layout_marginTop="5dp"
+                        android:padding="5dp"
+                        android:gravity="center"
+                        android:text="연 승 가 도"
+                        android:textColor="#FFE607"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="24sp"
+                        android:background="@drawable/buttonshape3">
+                    </Button>
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".02"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".12"
+                android:orientation="horizontal"
+                android:weightSum="1">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"
+                    android:weightSum="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:layout_marginRight="8dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/buttonshape3"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".35"
+                        android:layout_marginLeft="9dp"
+                        android:background="@drawable/myrecord1_1"
+                        android:layout_gravity="center_vertical"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".65"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/record"
+                        android:textColor="#FFE607"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:textSize="32sp"/>
+                </LinearLayout>
                 <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginLeft="9dp"
-                    android:background="@drawable/crown3_1"
-                    android:layout_gravity="center_vertical"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:text="@string/achievement"
-                    android:textColor="#FFE607"
-                    android:textStyle="bold"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:textSize="32sp"/>
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"/>
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight=".25">
-                <Button
-                    android:id="@+id/ach1"
-                    android:layout_width="120dp"
-                    android:layout_height="100dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="매 일 노 력 하 는 자"
-                    android:textColor="#575757"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="25sp"
-                    android:background="@drawable/buttonshape4">
-                </Button>
-                <Button
-                    android:id="@+id/ach2"
-                    android:layout_width="120dp"
-                    android:layout_height="100dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="스 쿼 트    중 수"
-                    android:textColor="#FFE607"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="25sp"
-                    android:background="@drawable/buttonshape3">
-                </Button>
-                <Button
-                    android:id="@+id/ach3"
-                    android:layout_width="120dp"
-                    android:layout_height="100dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="연 승 가 도"
-                    android:textColor="#FFE607"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="25sp"
-                    android:background="@drawable/buttonshape3">
-                </Button>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight=".12"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="8dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:orientation="horizontal"
-                android:background="@drawable/buttonshape3"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginLeft="9dp"
-                    android:background="@drawable/myrecord1_1"
-                    android:layout_gravity="center_vertical"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:text="@string/record"
-                    android:textColor="#FFE607"
-                    android:textStyle="bold"
-                    android:gravity="center_vertical"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="32sp"/>
-            </LinearLayout>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight=".25">
-                <Button
-                    android:id="@+id/rec1"
-                    android:layout_width="120dp"
-                    android:layout_height="100dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="스쿼트\n개수"
-                    android:textColor="#FFE607"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="25sp"
-                    android:background="@drawable/buttonshape3">
-                </Button>
-                <Button
-                    android:id="@+id/rec2"
-                    android:layout_width="120dp"
-                    android:layout_height="100dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="최단시간"
-                    android:textColor="#FFE607"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="25sp"
-                    android:background="@drawable/buttonshape3">
-                </Button>
-                <Button
-                    android:id="@+id/rec3"
-                    android:layout_width="120dp"
-                    android:layout_height="100dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="SOLO\nSTAGE"
-                    android:textColor="#FFE607"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="25sp"
-                    android:background="@drawable/buttonshape3">
-                </Button>
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/to_setting"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight=".12"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="8dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:orientation="horizontal"
-                android:background="@drawable/buttonshape3"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-                <ImageView
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginLeft="9dp"
-                    android:background="@drawable/setting1_2"
-                    android:layout_gravity="center_vertical"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:text="@string/setting"
-                    android:textColor="#FFE607"
-                    android:textStyle="bold"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:textSize="32sp"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight=".12"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="8dp"
-                android:paddingLeft="5dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:paddingRight="15dp"
-                android:orientation="horizontal"
-                android:background="@drawable/buttonshape3"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-                <ImageView
-                    android:id="@+id/to_cuscen"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginLeft="9dp"
-                    android:background="@drawable/cuscen1_1"
-                    android:layout_gravity="center_vertical"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:text="@string/customer_center"
-                    android:textColor="#FFE607"
-                    android:textStyle="bold"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:textSize="32sp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:weightSum="1">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".02"/>
+                    <Button
+                        android:id="@+id/rec1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.3"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center"
+                        android:text="스쿼트\n개수"
+                        android:textColor="#FFE607"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="25sp"
+                        android:background="@drawable/buttonshape3">
+                    </Button>
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".02"/>
+                    <Button
+                        android:id="@+id/rec2"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.3"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center"
+                        android:text="최단시간"
+                        android:textColor="#FFE607"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="25sp"
+                        android:background="@drawable/buttonshape3">
+                    </Button>
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".02"/>
+                    <Button
+                        android:id="@+id/rec3"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.3"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center"
+                        android:text="SOLO\nSTAGE"
+                        android:textColor="#FFE607"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="25sp"
+                        android:background="@drawable/buttonshape3">
+                    </Button>
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".03"/>
+                </LinearLayout>
             </LinearLayout>
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight=".02"/>
+                android:layout_weight=".025"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                android:layout_weight=".15">
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".02"/>
+                <LinearLayout
+                    android:id="@+id/to_setting"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".45"
+                    android:weightSum="1"
+                    android:padding="10dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/buttonshape3"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".35"
+                        android:background="@drawable/setting1_2"
+                        android:layout_gravity="center_vertical"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".65"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center"
+                        android:text="@string/setting"
+                        android:textColor="#FFE607"
+                        android:textSize="32sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".05"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".45"
+                    android:weightSum="1"
+                    android:padding="10dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/buttonshape3"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <ImageView
+                        android:id="@+id/to_cuscen"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".35"
+                        android:background="@drawable/cuscen1_1"
+                        android:layout_gravity="center_vertical"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".65"
+                        android:text="@string/customer_center"
+                        android:textColor="#FFE607"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center"
+                        android:textSize="32sp" />
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".02"/>
+            </LinearLayout>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".025"/>
         </LinearLayout>
     </LinearLayout>
 

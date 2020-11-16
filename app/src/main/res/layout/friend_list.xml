@@ -2,13 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp">
 
     <LinearLayout
         android:id="@+id/friend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="10dp"
         android:padding="10dp"
@@ -26,7 +27,7 @@
         <TextView
             android:id="@+id/friend_name"
             android:layout_width="0dp"
-            android:layout_weight=".55"
+            android:layout_weight=".5"
             android:layout_height="wrap_content"
             android:text="I D"
             android:textStyle="bold"
@@ -46,7 +47,6 @@
             android:textSize="14sp"
             android:layout_gravity="center_vertical"
             android:background="@drawable/buttonshape3" />
-
         <Button
             android:id="@+id/delete_friend"
             android:layout_width="0dp"
@@ -60,5 +60,9 @@
             android:textSize="14sp"
             android:layout_gravity="center_vertical"
             android:background="@drawable/buttonshape3" />
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".05"/>
     </LinearLayout> />
 </LinearLayout>

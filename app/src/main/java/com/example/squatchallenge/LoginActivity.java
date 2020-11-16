@@ -2,13 +2,18 @@ package com.example.squatchallenge;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.TextViewCompat;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -38,25 +43,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-    public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-        private SignInButton btn_google;        //구글 로그인 버튼
-        private FirebaseAuth auth;              //파이어베이스 인증 객체
-        private GoogleApiClient googleApiClient;    //구글 api 클라이언트 객체
-        private static final int REQ_SIGN_GOOGLE = 100;     //구글 로그인 결과 코드
+    private TextView title;
+    private SignInButton btn_google;        //구글 로그인 버튼
+    private FirebaseAuth auth;              //파이어베이스 인증 객체
+    private GoogleApiClient googleApiClient;    //구글 api 클라이언트 객체
+    private static final int REQ_SIGN_GOOGLE = 100;     //구글 로그인 결과 코드
 
-        //----------------------------test----------------------------------
-        private String userEmail;
-        private String userName;
-        DatabaseReference DB;
+    private String userEmail;
+    private String userName;
+    DatabaseReference DB;
 
-        //-------------------------------------------------------------------
-
-        @Override
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
     protected void onCreate(Bundle savedInstanceState) {        //앱이 실행될때 처음 수행
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        //title.setAutoSizeTextTypeUniformWithConfiguration(80,160,1,TypedValue.COMPLEX_UNIT_DIP);
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()

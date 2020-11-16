@@ -27,6 +27,12 @@ public class stage1 extends AppCompatActivity {
         stage1.setOnClickListener(view -> {
             stage_clear(stage1);
         });
+
+        ImageView home1 = findViewById(R.id.home1);
+        home1.setOnClickListener(view -> {
+            Intent intent13 = new Intent(getApplicationContext(), Main.class);
+            startActivity(intent13);
+        });
     }
 
     public void stage_clear(TextView textview){

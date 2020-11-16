@@ -9,17 +9,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:weightSum="1"
         android:background="#575757">
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="0dp"
+            android:layout_weight=".25"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:background="@drawable/name">
         </ImageView>
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight=".35"
             android:padding="10dp"
             android:layout_gravity="center">
             <include
@@ -35,103 +38,180 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:orientation="vertical"
+                android:weightSum="1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".05"/>
                 <LinearLayout
-                    android:orientation="horizontal"
-                    android:id="@+id/My_page"
-                    android:layout_width="200dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/buttonshape3">
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".25"
+                    android:weightSum="1">
                     <ImageView
-                        android:layout_width="45dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        app:srcCompat="@drawable/me1_1" />
-                    <TextView
-                        android:layout_width="130dp"
-                        android:layout_height="40dp"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".2"/>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:id="@+id/My_page"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".6"
+                        android:weightSum="1"
+                        android:padding="10dp"
                         android:layout_gravity="center"
-                        android:fadeScrollbars="true"
-                        android:textStyle="bold"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:text="마 이 페 이 지"
-                        android:background="#575757"
-                        android:textColor="#FFE607"
-                        android:textSize="20sp" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/Quest"
-                    android:orientation="horizontal"
-                    android:layout_width="200dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/buttonshape3">
+                        android:background="@drawable/buttonshape3">
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_weight=".15"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="10dp"
+                            app:srcCompat="@drawable/me1_1" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".8"
+                            android:layout_gravity="center"
+                            android:fadeScrollbars="true"
+                            android:textStyle="bold"
+                            android:gravity="center_vertical|center_horizontal"
+                            android:text="마 이 페 이 지"
+                            android:background="#575757"
+                            android:textColor="#FFE607"
+                            android:textSize="22sp" />
+                    </LinearLayout>
                     <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        app:srcCompat="@drawable/quest2_1" />
-                    <TextView
-                        android:layout_width="130dp"
-                        android:layout_height="40dp"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".2"/>
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".1"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".25"
+                    android:weightSum="1">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".2"/>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:id="@+id/Quest"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".6"
+                        android:weightSum="1"
+                        android:padding="10dp"
                         android:layout_gravity="center"
-                        android:background="#575757"
-                        android:textStyle="bold"
-                        android:textColor="#FFE607"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:text="퀘 스 트"
-                        android:textSize="20sp" />
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/Friendlist"
-                    android:orientation="horizontal"
-                    android:layout_width="200dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/buttonshape3">
+                        android:background="@drawable/buttonshape3">
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_weight=".15"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="10dp"
+                            app:srcCompat="@drawable/quest2_1" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".8"
+                            android:layout_gravity="center"
+                            android:fadeScrollbars="true"
+                            android:textStyle="bold"
+                            android:gravity="center_vertical|center_horizontal"
+                            android:text="퀘  스  트"
+                            android:background="#575757"
+                            android:textColor="#FFE607"
+                            android:textSize="22sp" />
+                    </LinearLayout>
                     <ImageView
-                        android:layout_width="45dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        app:srcCompat="@drawable/friends1_1" />
-                    <TextView
-                        android:layout_width="130dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:background="#575757"
-                        android:textStyle="bold"
-                        android:textColor="#FFE607"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:text="친 구 목 록"
-                        android:textSize="20sp" />
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".2"/>
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".1"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".25"
+                    android:weightSum="1">
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".2"/>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:id="@+id/Friendlist"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".6"
+                        android:weightSum="1"
+                        android:padding="10dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/buttonshape3">
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_weight=".15"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="10dp"
+                            app:srcCompat="@drawable/friends1_1" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".8"
+                            android:layout_gravity="center"
+                            android:fadeScrollbars="true"
+                            android:textStyle="bold"
+                            android:gravity="center_vertical|center_horizontal"
+                            android:text="친 구 목 록"
+                            android:background="#575757"
+                            android:textColor="#FFE607"
+                            android:textSize="22sp" />
+                    </LinearLayout>
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".2"/>
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".03"/>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="20dp"
+            android:layout_height="0dp"
+            android:layout_weight=".3"
             android:orientation="horizontal"
+            android:weightSum="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight=".025"/>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/Solo"
-                android:layout_weight="1"
+                android:layout_weight=".45"
                 android:paddingLeft="7dp"
                 android:paddingBottom="10dp"
                 android:paddingRight="7dp"
                 android:orientation="vertical"
-                android:layout_marginLeft="10dp"
                 android:background="@drawable/buttonshape3">
                 <TextView
                     android:layout_width="match_parent"
@@ -150,16 +230,19 @@
                     android:layout_gravity="center_horizontal|center_vertical"
                     android:background="@drawable/squat1_2"/>
             </LinearLayout>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight=".05"/>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/Random"
                 android:paddingLeft="7dp"
                 android:paddingBottom="10dp"
                 android:paddingRight="7dp"
-                android:layout_weight="1"
+                android:layout_weight=".45"
                 android:orientation="vertical"
-                android:layout_marginLeft="10dp"
                 android:background="@drawable/buttonshape3">
                 <TextView
                     android:layout_width="wrap_content"
@@ -179,7 +262,15 @@
                     android:layout_gravity="center_horizontal|center_vertical"
                     android:background="@drawable/squat2_2" />
             </LinearLayout>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight=".025"/>
         </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".07"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

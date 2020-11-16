@@ -133,7 +133,7 @@ public class Mypage extends AppCompatActivity {
             else if(button == findViewById(R.id.ach2)) {
                 button.setTextColor(0xAA575757);
                 button.setBackgroundColor(0xAAFFE607);
-                tv_myach.setText(button.getText());
+                tv_myach.setText("스 쿼 트  중 수");
                 button.setBackgroundResource(R.drawable.buttonshape4);
                 ach1.setTextColor(0xAAFFE607);
                 ach1.setBackgroundColor(0xAA575757);
