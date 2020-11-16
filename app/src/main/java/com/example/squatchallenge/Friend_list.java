@@ -45,7 +45,7 @@ public class Friend_list extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     DatabaseReference DB;
     String email="";
-    String[] friendSet = {"친구를 추가하세요"};
+    String[] friendSet = {"친구를\n추가하세요"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +151,7 @@ public class Friend_list extends AppCompatActivity {
                     friendSet[friends] = fname;
                     adapter = new MyAdapter_friend(friendSet);
                     recyclerView.setAdapter(adapter);
-                    friends_num.setText("친구 2 / "+ (friends+1));
+                    friends_num.setText("친구 0 / "+ (friends+1));
                 }
             }
             @Override
@@ -170,7 +170,7 @@ public class Friend_list extends AppCompatActivity {
                 // datasnapshot 정확히 모르겠는데 걍 쓰는중
                 Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
                 int friends = (int)snapshot.getChildrenCount(); // 친구수
-                friends_num.setText("친구 2 / "+ friends);
+                friends_num.setText("친구 0 / "+ friends);
 
                 // child 돌면서 value 가져와서 배열에 넣음
                 for(int i=0;i<friends;i++) {
