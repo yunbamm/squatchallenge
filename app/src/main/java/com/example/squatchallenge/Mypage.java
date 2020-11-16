@@ -64,6 +64,7 @@ public class Mypage extends AppCompatActivity {
         rec3 = findViewById(R.id.rec3);
         rec1.setOnClickListener(view -> { // 각 기록 누르면 db가서 값 가져옴
             DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/total_count");
+
             DB.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {

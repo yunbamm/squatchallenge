@@ -79,10 +79,10 @@ public class Main extends AppCompatActivity {
         my_page = findViewById(R.id.My_page); // 마이페이지로
         my_page.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
-            startActivity(intent1);
             intent1.putExtra("name" , nickName);
             intent1.putExtra("photoUrl",photoUrl);
             intent1.putExtra("Email",email);
+            startActivity(intent1);
         });
 
         LinearLayout solo = findViewById(R.id.Solo);
