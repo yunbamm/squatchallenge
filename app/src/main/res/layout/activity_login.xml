@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity"
+    android:background="@drawable/login2">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="1">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".15"/>
+        <TextView
+            android:id="@+id/title"
+            android:layout_weight=".45"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:text="SQUAT\nSQUAD"
+            android:textSize="90sp"
+            android:gravity="center"
+            android:fontFamily="@font/kanit_black"
+            android:textColor="#FFE607"/>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".05"/>
+        <com.google.android.gms.common.SignInButton
+            android:layout_weight=".05"
+            android:id="@+id/btn_google"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:background="@drawable/buttonshape5"/>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".3"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
