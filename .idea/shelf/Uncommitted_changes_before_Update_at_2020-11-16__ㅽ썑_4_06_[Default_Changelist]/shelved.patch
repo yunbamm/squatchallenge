@@ -1,0 +1,2803 @@
+Index: app/src/main/java/com/example/squatchallenge/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.squatchallenge;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.os.ResultReceiver;\r\nimport android.util.Log;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.Toast;\r\n\r\nimport com.google.android.gms.auth.api.Auth;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignIn;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInAccount;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInOptions;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInResult;\r\nimport com.google.android.gms.common.ConnectionResult;\r\nimport com.google.android.gms.common.SignInButton;\r\nimport com.google.android.gms.common.api.GoogleApiClient;\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.auth.AuthCredential;\r\nimport com.google.firebase.auth.AuthResult;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\nimport com.google.firebase.auth.GoogleAuthProvider;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\nimport com.google.firebase.firestore.FirebaseFirestore;\r\n\r\nimport java.util.HashMap;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\n\r\n    public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {\r\n\r\n        private SignInButton btn_google;        //구글 로그인 버튼\r\n        private FirebaseAuth auth;              //파이어베이스 인증 객체\r\n        private GoogleApiClient googleApiClient;    //구글 api 클라이언트 객체\r\n        private static final int REQ_SIGN_GOOGLE = 100;     //구글 로그인 결과 코드\r\n\r\n        //----------------------------test----------------------------------\r\n        private String userEmail;\r\n        private String userName;\r\n        DatabaseReference DB;\r\n\r\n        //-------------------------------------------------------------------\r\n\r\n        @Override\r\n    protected void onCreate(Bundle savedInstanceState) {        //앱이 실행될때 처음 수행\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login);\r\n\r\n        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)\r\n                .requestIdToken(getString(R.string.default_web_client_id))\r\n                .requestEmail()\r\n                .build();\r\n\r\n        googleApiClient = new GoogleApiClient.Builder(this)\r\n                .enableAutoManage(this,this)\r\n                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)\r\n                .build();\r\n\r\n        auth = FirebaseAuth.getInstance();      //파이어베이스 인증객체 초기화\r\n\r\n        btn_google=findViewById(R.id.btn_google);\r\n        btn_google.setOnClickListener(new View.OnClickListener() {      //구글 로그인 버튼을 클릭했을때 이곳을 수행\r\n            @Override\r\n            public void onClick(View view) {\r\n                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);      //구글에서 제공하는 인증화면\r\n                startActivityForResult(intent , REQ_SIGN_GOOGLE);           //?\r\n            }\r\n        });\r\n    }\r\n\r\n    //---------------------------------------------------------------\r\n    //함수부분\r\n    //DB내의 중복아이디 검사\r\n    public void check(final String userEmail , final String username) {\r\n        DB = FirebaseDatabase.getInstance().getReference(\"users\");         //완탐을 위해\r\n        DB.addListenerForSingleValueEvent(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                boolean exist = false;\r\n\r\n                Iterator<DataSnapshot> child = snapshot.getChildren().iterator();\r\n\r\n                while (child.hasNext()) {\r\n                    //존재할때\r\n                    if (child.next().getKey().equals(userEmail)) {\r\n                        exist = true;\r\n                        break;\r\n                    }\r\n                }\r\n\r\n                if(!exist){\r\n                    writeNewUser(userEmail , username);\r\n                }\r\n            }\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n    }\r\n    //새로운 사용자 등록\r\n    void writeNewUser(final String userEmail , String username) {\r\n        DB = FirebaseDatabase.getInstance().getReference();        //mDatabase가 root라고 생각\r\n        User user = new User(username);\r\n        DB.child(\"users\").child(userEmail).setValue(user);           //객체 user\r\n    }\r\n\r\n    //이메일 @앞까지 파싱\r\n    private String parsingEmail(String userEmail){\r\n        String tmpEmail = \"\";\r\n        for(int i=0;i<userEmail.length();i++){\r\n            if(userEmail.charAt(i) == '@') break;\r\n            tmpEmail+=userEmail.charAt(i);\r\n        }\r\n        return tmpEmail;\r\n    }\r\n\r\n    //---------------------------------------------------------------\r\n    @Override\r\n    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {       //구글 로그인 인증을 요청했을때  값을 되돌려 받는곳\r\n        super.onActivityResult(requestCode, resultCode, data);\r\n\r\n        if(requestCode == REQ_SIGN_GOOGLE){\r\n            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);\r\n\r\n            if(result.isSuccess()){     //인증 결과가 성공적이면\r\n                GoogleSignInAccount account = result.getSignInAccount();        //account는 구글 로그인 정보를 담고있다(닉네임,프사,이메일주소..)\r\n                resultLogin(account);       //로그인 결과값 출력 수행하라는 메소드\r\n            }\r\n        }\r\n    }\r\n\r\n    private void resultLogin(final GoogleSignInAccount account) {\r\n        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(),null);\r\n        auth.signInWithCredential(credential)\r\n                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {\r\n                    @Override\r\n                    public void onComplete(@NonNull Task<AuthResult> task) {\r\n                        if(task.isSuccessful()){    //로그인이 성공했으면\r\n                            Toast.makeText(LoginActivity.this , \"로그인 성공\",Toast.LENGTH_SHORT).show();\r\n                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);\r\n                            intent.putExtra(\"name\" , account.getDisplayName());         //key값 :Nickname\r\n                            intent.putExtra(\"photoUrl\",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환\r\n                            intent.putExtra(\"Email\",parsingEmail(account.getEmail()));\r\n\r\n                            //----------------------------userid와 username을 가져온다\r\n                            userEmail = account.getEmail();\r\n                            userName = account.getDisplayName();\r\n                            userEmail = parsingEmail(userEmail);\r\n\r\n                            //userEmail이 DB에 존재하는 email인지 확인\r\n                            check(userEmail , userName);\r\n                            //--------------------------------------------------------\r\n                            startActivity(intent);\r\n                        }\r\n                        else{       //로그인 실패했으면\r\n                            Toast.makeText(LoginActivity.this , \"로그인 실패\",Toast.LENGTH_SHORT).show();\r\n                        }\r\n                    }\r\n                });\r\n    }\r\n\r\n    @Override\r\n    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {\r\n\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/LoginActivity.java	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/java/com/example/squatchallenge/LoginActivity.java	(date 1605506921463)
+@@ -149,7 +149,7 @@
+                     public void onComplete(@NonNull Task<AuthResult> task) {
+                         if(task.isSuccessful()){    //로그인이 성공했으면
+                             Toast.makeText(LoginActivity.this , "로그인 성공",Toast.LENGTH_SHORT).show();
+-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
++                            Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
+                             intent.putExtra("name" , account.getDisplayName());         //key값 :Nickname
+                             intent.putExtra("photoUrl",String.valueOf(account.getPhotoUrl()));      //String.valueOf : 특정 자료형을 String형태로 변환
+                             intent.putExtra("Email",parsingEmail(account.getEmail()));
+Index: app/src/main/res/layout/activity_friend_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.coordinatorlayout.widget.CoordinatorLayout\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:fitsSystemWindows=\"true\"\r\n    tools:context=\".Friend_list\">\r\n\r\n    <com.google.android.material.appbar.AppBarLayout\r\n        android:id=\"@+id/app_bar\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"200dp\"\r\n        android:background=\"#FFFFFF\"\r\n        android:fitsSystemWindows=\"true\"\r\n        android:theme=\"@style/AppTheme.AppBarOverlay\">\r\n\r\n        <com.google.android.material.appbar.CollapsingToolbarLayout\r\n            android:id=\"@+id/toolbar_layout\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"match_parent\"\r\n            android:fitsSystemWindows=\"true\"\r\n            app:contentScrim=\"?attr/colorPrimary\"\r\n            app:layout_scrollFlags=\"scroll|exitUntilCollapsed\"\r\n            app:toolbarId=\"@+id/toolbar\">\r\n\r\n            <FrameLayout\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"match_parent\">\r\n                <LinearLayout\r\n                    android:layout_width=\"match_parent\"\r\n                    android:layout_height=\"match_parent\"\r\n                    android:orientation=\"horizontal\">\r\n                    <ImageView\r\n                        android:id=\"@+id/iv_profile_f\"\r\n                        android:layout_width=\"100dp\"\r\n                        android:layout_height=\"100dp\"\r\n                        android:layout_marginLeft=\"16dp\"\r\n                        android:layout_gravity=\"center_vertical\"\r\n                        android:background=\"#FFFFFF\"\r\n                        app:layout_constraintLeft_toLeftOf=\"parent\"\r\n                        app:layout_constraintRight_toRightOf=\"@+id/tv_name\"\r\n                        app:srcCompat=\"@drawable/friends1\" />\r\n                    <TextView\r\n                        android:id=\"@+id/friends_num\"\r\n                        android:layout_width=\"160dp\"\r\n                        android:layout_height=\"100dp\"\r\n                        android:layout_marginLeft=\"10dp\"\r\n                        android:gravity=\"center_horizontal|center_vertical\"\r\n                        android:layout_gravity=\"center_vertical\"\r\n                        android:text=\" 친 구( 3 / 12)\"\r\n                        android:textColor=\"#000000\"\r\n                        android:textSize=\"22sp\"\r\n                        app:layout_constraintLeft_toRightOf=\"@+id/iv_profile\"\r\n                        app:layout_constraintRight_toRightOf=\"@+id/add_friend\" />\r\n                    <Button\r\n                        android:id=\"@+id/add_friend_button\"\r\n                        android:layout_width=\"70dp\"\r\n                        android:layout_height=\"70dp\"\r\n                        android:layout_marginLeft=\"10dp\"\r\n                        android:gravity=\"center_horizontal|center_vertical\"\r\n                        android:layout_gravity=\"center_vertical\"\r\n                        android:textStyle=\"bold\"\r\n                        android:text=\"친구추가\"\r\n                        android:textColor=\"#000000\"\r\n                        android:textSize=\"11sp\"\r\n                        app:layout_constraintLeft_toRightOf=\"@+id/tv_name\"\r\n                        android:background=\"@drawable/buttonshape1\"/>\r\n                </LinearLayout>\r\n                <LinearLayout\r\n                    android:id=\"@+id/add_friend_chang\"\r\n                    android:layout_width=\"260dp\"\r\n                    android:layout_height=\"60dp\"\r\n                    android:layout_marginLeft=\"50dp\"\r\n                    android:layout_gravity=\"center_vertical\"\r\n                    android:background=\"@drawable/buttonshape1\">\r\n                    <EditText\r\n                        android:id=\"@+id/add_friend_name\"\r\n                        android:layout_width=\"175dp\"\r\n                        android:layout_height=\"45dp\"\r\n                        android:layout_marginLeft=\"15dp\"\r\n                        android:gravity=\"center_horizontal|center_vertical\"\r\n                        android:layout_gravity=\"center_vertical\"\r\n                        android:hint=\"아이디를 입력해주세요\"\r\n                        android:textColor=\"#000000\"\r\n                        android:textSize=\"15sp\"\r\n                        android:inputType=\"text\"\r\n                        android:background=\"#FFFFFF\"\r\n                        android:textColorHint=\"#BAB9B9\" />\r\n                    <Button\r\n                        android:id=\"@+id/add_friend\"\r\n                        android:layout_width=\"50dp\"\r\n                        android:layout_height=\"45dp\"\r\n                        android:layout_marginLeft=\"5dp\"\r\n                        android:gravity=\"center_horizontal|center_vertical\"\r\n                        android:layout_gravity=\"center_vertical\"\r\n                        android:text=\"추가\"\r\n                        android:textColor=\"#000000\"\r\n                        android:background=\"@drawable/buttonshape2\"/>\r\n                </LinearLayout>\r\n            </FrameLayout>\r\n\r\n        </com.google.android.material.appbar.CollapsingToolbarLayout>\r\n    </com.google.android.material.appbar.AppBarLayout>\r\n    <include\r\n        layout=\"@layout/friendlist_scroll\"\r\n        android:layout_height=\"fill_parent\"\r\n        android:layout_width=\"fill_parent\"\r\n        android:layout_marginTop=\"200dp\"/>\r\n</androidx.coordinatorlayout.widget.CoordinatorLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_friend_list.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/res/layout/activity_friend_list.xml	(date 1605507330482)
+@@ -6,7 +6,8 @@
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:fitsSystemWindows="true"
+-    tools:context=".Friend_list">
++    tools:context=".Friend_list"
++    android:background="#575757">
+ 
+     <com.google.android.material.appbar.AppBarLayout
+         android:id="@+id/app_bar"
+@@ -23,7 +24,8 @@
+             android:fitsSystemWindows="true"
+             app:contentScrim="?attr/colorPrimary"
+             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+-            app:toolbarId="@+id/toolbar">
++            app:toolbarId="@+id/toolbar"
++            android:background="#FFE607">
+ 
+             <FrameLayout
+                 android:layout_width="match_parent"
+@@ -41,7 +43,7 @@
+                         android:background="#FFFFFF"
+                         app:layout_constraintLeft_toLeftOf="parent"
+                         app:layout_constraintRight_toRightOf="@+id/tv_name"
+-                        app:srcCompat="@drawable/friends1" />
++                        app:srcCompat="@drawable/friends1_2" />
+                     <TextView
+                         android:id="@+id/friends_num"
+                         android:layout_width="160dp"
+@@ -50,8 +52,9 @@
+                         android:gravity="center_horizontal|center_vertical"
+                         android:layout_gravity="center_vertical"
+                         android:text=" 친 구( 3 / 12)"
+-                        android:textColor="#000000"
+-                        android:textSize="22sp"
++                        android:textColor="#575757"
++                        android:textSize="24sp"
++                        android:textStyle="bold"
+                         app:layout_constraintLeft_toRightOf="@+id/iv_profile"
+                         app:layout_constraintRight_toRightOf="@+id/add_friend" />
+                     <Button
+@@ -63,10 +66,10 @@
+                         android:layout_gravity="center_vertical"
+                         android:textStyle="bold"
+                         android:text="친구추가"
+-                        android:textColor="#000000"
+-                        android:textSize="11sp"
++                        android:textColor="#575757"
++                        android:textSize="12sp"
+                         app:layout_constraintLeft_toRightOf="@+id/tv_name"
+-                        android:background="@drawable/buttonshape1"/>
++                        android:background="@drawable/buttonshape4"/>
+                 </LinearLayout>
+                 <LinearLayout
+                     android:id="@+id/add_friend_chang"
+@@ -74,7 +77,7 @@
+                     android:layout_height="60dp"
+                     android:layout_marginLeft="50dp"
+                     android:layout_gravity="center_vertical"
+-                    android:background="@drawable/buttonshape1">
++                    android:background="@drawable/buttonshape4">
+                     <EditText
+                         android:id="@+id/add_friend_name"
+                         android:layout_width="175dp"
+@@ -84,9 +87,9 @@
+                         android:layout_gravity="center_vertical"
+                         android:hint="아이디를 입력해주세요"
+                         android:textColor="#000000"
+-                        android:textSize="15sp"
++                        android:textSize="16sp"
+                         android:inputType="text"
+-                        android:background="#FFFFFF"
++                        android:background="#FFE607"
+                         android:textColorHint="#BAB9B9" />
+                     <Button
+                         android:id="@+id/add_friend"
+@@ -96,8 +99,9 @@
+                         android:gravity="center_horizontal|center_vertical"
+                         android:layout_gravity="center_vertical"
+                         android:text="추가"
+-                        android:textColor="#000000"
+-                        android:background="@drawable/buttonshape2"/>
++                        android:textStyle="bold"
++                        android:textColor="#575757"
++                        android:background="@drawable/buttonshape4"/>
+                 </LinearLayout>
+             </FrameLayout>
+ 
+@@ -108,4 +112,4 @@
+         android:layout_height="fill_parent"
+         android:layout_width="fill_parent"
+         android:layout_marginTop="200dp"/>
+-</androidx.coordinatorlayout.widget.CoordinatorLayout>
++</androidx.coordinatorlayout.widget.CoordinatorLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_login.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".LoginActivity\">\r\n\r\n    <TextView\r\n        android:id=\"@+id/textView\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginTop=\"150dp\"\r\n        android:text=\"Squat Squad\"\r\n        android:textColor=\"#000000\"\r\n        android:textSize=\"36sp\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\" />\r\n\r\n    <com.google.android.gms.common.SignInButton\r\n        android:id=\"@+id/btn_google\"\r\n        android:layout_width=\"200dp\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginTop=\"100dp\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toBottomOf=\"@+id/imageView\" />\r\n\r\n    <ImageView\r\n        android:id=\"@+id/imageView\"\r\n        android:layout_width=\"200dp\"\r\n        android:layout_height=\"200dp\"\r\n        app:layout_constraintEnd_toEndOf=\"@+id/textView\"\r\n        app:layout_constraintStart_toStartOf=\"@+id/textView\"\r\n        app:layout_constraintTop_toBottomOf=\"@+id/textView\"\r\n        app:srcCompat=\"@drawable/squat\" />\r\n\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_login.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/res/layout/activity_login.xml	(date 1605506436999)
+@@ -4,36 +4,42 @@
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+-    tools:context=".LoginActivity">
++    tools:context=".LoginActivity"
++    android:background="@drawable/login2">
+ 
+-    <TextView
+-        android:id="@+id/textView"
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:layout_marginTop="150dp"
+-        android:text="Squat Squad"
+-        android:textColor="#000000"
+-        android:textSize="36sp"
+-        app:layout_constraintEnd_toEndOf="parent"
+-        app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintTop_toTopOf="parent" />
+-
+-    <com.google.android.gms.common.SignInButton
+-        android:id="@+id/btn_google"
+-        android:layout_width="200dp"
+-        android:layout_height="wrap_content"
+-        android:layout_marginTop="100dp"
+-        app:layout_constraintEnd_toEndOf="parent"
+-        app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+-
+-    <ImageView
+-        android:id="@+id/imageView"
+-        android:layout_width="200dp"
+-        android:layout_height="200dp"
+-        app:layout_constraintEnd_toEndOf="@+id/textView"
+-        app:layout_constraintStart_toStartOf="@+id/textView"
+-        app:layout_constraintTop_toBottomOf="@+id/textView"
+-        app:srcCompat="@drawable/squat" />
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:weightSum="1">
++        <ImageView
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".15"/>
++        <TextView
++            android:layout_weight=".45"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:text="SQUAT\nSQUAD"
++            android:gravity="center"
++            android:textSize="90sp"
++            android:textColor="#FFE607"/>
++        <ImageView
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".05" />
++        <com.google.android.gms.common.SignInButton
++            android:layout_weight=".05"
++            android:id="@+id/btn_google"
++            android:layout_width="200dp"
++            android:layout_height="wrap_content"
++            android:layout_gravity="center"
++            android:padding="4dp"
++            android:background="@drawable/buttonshape3"/>
++        <ImageView
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".3"/>
++    </LinearLayout>
+ 
+ </androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_mypage.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:fadingEdge=\"none\"\r\n    android:layerType=\"none\"\r\n    android:background=\"#575757\"\r\n    tools:context=\".Mypage\">\r\n\r\n    <LinearLayout\r\n        android:id=\"@+id/mypage_linearLayout1\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:orientation=\"horizontal\"\r\n        android:background=\"#FFE607\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\">\r\n        <ImageView\r\n            android:id=\"@+id/iv_profile\"\r\n            android:layout_width=\"100dp\"\r\n            android:layout_height=\"100dp\"\r\n            android:layout_marginStart=\"20dp\"\r\n            android:layout_marginLeft=\"20dp\"\r\n            android:layout_marginTop=\"10dp\"\r\n            android:layout_marginBottom=\"10dp\"\r\n            android:background=\"@drawable/buttonshape4\"\r\n            android:layout_gravity=\"center_vertical\"\r\n            app:layout_constraintEnd_toStartOf=\"@+id/tv_name\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintTop_toTopOf=\"parent\"\r\n            app:srcCompat=\"@drawable/ic_launcher_foreground\" />\r\n\r\n        <LinearLayout\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:orientation=\"vertical\"\r\n            android:layout_marginTop=\"10dp\"\r\n            android:paddingRight=\"15dp\"\r\n            android:paddingLeft=\"15dp\"\r\n            android:layout_marginLeft=\"15dp\"\r\n            android:background=\"@drawable/buttonshape4\">\r\n            <TextView\r\n                android:id=\"@+id/tv_myach\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginTop=\"5dp\"\r\n                android:gravity=\"center\"\r\n                android:layout_gravity=\"center\"\r\n                android:text=\"매 일 노 력 하 는 자\"\r\n                android:textColor=\"#575757\"\r\n                android:textStyle=\"bold\"\r\n                android:textSize=\"28sp\" />\r\n            <TextView\r\n                android:id=\"@+id/tv_name\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginTop=\"5dp\"\r\n                android:layout_marginBottom=\"5dp\"\r\n                android:gravity=\"center\"\r\n                android:layout_gravity=\"center\"\r\n                android:text=\"I D\"\r\n                android:textColor=\"#575757\"\r\n                android:textStyle=\"bold\"\r\n                android:textSize=\"36sp\" />\r\n        </LinearLayout>\r\n    </LinearLayout>\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginStart=\"8dp\"\r\n        android:layout_marginLeft=\"8dp\"\r\n        android:layout_marginTop=\"5dp\"\r\n        android:orientation=\"vertical\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        android:gravity=\"center_vertical\"\r\n        app:layout_constraintTop_toBottomOf=\"@+id/mypage_linearLayout1\">\r\n        <LinearLayout\r\n            android:id=\"@+id/achiv\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"8dp\"\r\n            android:layout_marginLeft=\"8dp\"\r\n            android:layout_marginTop=\"5dp\"\r\n            android:paddingLeft=\"5dp\"\r\n            android:paddingTop=\"5dp\"\r\n            android:paddingBottom=\"5dp\"\r\n            android:layout_marginRight=\"8dp\"\r\n            android:orientation=\"horizontal\"\r\n            android:background=\"@drawable/buttonshape3\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\">\r\n\r\n            <ImageView\r\n                android:layout_width=\"50dp\"\r\n                android:layout_height=\"50dp\"\r\n                android:layout_marginLeft=\"9dp\"\r\n                android:background=\"@drawable/crown3_1\"\r\n                android:layout_gravity=\"center_vertical\"/>\r\n            <TextView\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"50dp\"\r\n                android:layout_marginStart=\"10dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:text=\"@string/achievement\"\r\n                android:textColor=\"#FFE607\"\r\n                android:textStyle=\"bold\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:gravity=\"center_vertical\"\r\n                android:textSize=\"32sp\"/>\r\n        </LinearLayout>\r\n        <LinearLayout\r\n            android:orientation=\"horizontal\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"120dp\">\r\n            <Button\r\n                android:id=\"@+id/ach1\"\r\n                android:layout_width=\"120dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_marginStart=\"10dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:layout_marginTop=\"10dp\"\r\n                android:gravity=\"center\"\r\n                android:text=\"매일노력\\n하는자\"\r\n                android:textColor=\"#575757\"\r\n                android:textScaleX=\"1.05\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:textSize=\"25sp\"\r\n                android:background=\"@drawable/buttonshape4\">\r\n            </Button>\r\n            <Button\r\n                android:id=\"@+id/ach2\"\r\n                android:layout_width=\"120dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:layout_marginTop=\"10dp\"\r\n                android:gravity=\"center\"\r\n                android:text=\"스쿼트\\n중수\"\r\n                android:textColor=\"#FFE607\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:textSize=\"25sp\"\r\n                android:background=\"@drawable/buttonshape3\">\r\n            </Button>\r\n            <Button\r\n                android:id=\"@+id/ach3\"\r\n                android:layout_width=\"120dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:layout_marginTop=\"10dp\"\r\n                android:gravity=\"center\"\r\n                android:text=\"연승가도\"\r\n                android:textColor=\"#FFE607\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:textSize=\"25sp\"\r\n                android:background=\"@drawable/buttonshape3\">\r\n            </Button>\r\n        </LinearLayout>\r\n        <LinearLayout\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"8dp\"\r\n            android:layout_marginLeft=\"8dp\"\r\n            android:layout_marginTop=\"25dp\"\r\n            android:layout_marginRight=\"8dp\"\r\n            android:paddingLeft=\"5dp\"\r\n            android:paddingTop=\"5dp\"\r\n            android:paddingBottom=\"5dp\"\r\n            android:orientation=\"horizontal\"\r\n            android:background=\"@drawable/buttonshape3\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\">\r\n                <ImageView\r\n                    android:layout_width=\"45dp\"\r\n                    android:layout_height=\"50dp\"\r\n                    android:layout_marginLeft=\"9dp\"\r\n                    android:background=\"@drawable/myrecord1_1\"\r\n                    android:layout_gravity=\"center_vertical\"/>\r\n                <TextView\r\n                    android:layout_width=\"wrap_content\"\r\n                    android:layout_height=\"50dp\"\r\n                    android:layout_marginStart=\"10dp\"\r\n                    android:layout_marginLeft=\"10dp\"\r\n                    android:text=\"@string/record\"\r\n                    android:textColor=\"#FFE607\"\r\n                    android:textStyle=\"bold\"\r\n                    android:gravity=\"center_vertical\"\r\n                    android:layout_gravity=\"center_vertical\"\r\n                    android:textSize=\"32sp\"/>\r\n        </LinearLayout>\r\n        <LinearLayout\r\n            android:orientation=\"horizontal\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"120dp\">\r\n            <Button\r\n                android:id=\"@+id/rec1\"\r\n                android:layout_width=\"120dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_marginStart=\"10dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:layout_marginTop=\"10dp\"\r\n                android:gravity=\"center\"\r\n                android:text=\"스쿼트\\n개수\"\r\n                android:textColor=\"@color/button_selector1\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:textSize=\"25sp\"\r\n                android:background=\"@drawable/buttonshape3\">\r\n            </Button>\r\n            <Button\r\n                android:id=\"@+id/rec2\"\r\n                android:layout_width=\"120dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:layout_marginTop=\"10dp\"\r\n                android:gravity=\"center\"\r\n                android:text=\"최단시간\"\r\n                android:textColor=\"@color/button_selector1\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:textSize=\"25sp\"\r\n                android:background=\"@drawable/buttonshape3\">\r\n            </Button>\r\n            <Button\r\n                android:id=\"@+id/rec3\"\r\n                android:layout_width=\"120dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:layout_marginTop=\"10dp\"\r\n                android:gravity=\"center\"\r\n                android:text=\"SOLO\\nSTAGE\"\r\n                android:textColor=\"@color/button_selector1\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:textSize=\"25sp\"\r\n                android:background=\"@drawable/buttonshape3\">\r\n            </Button>\r\n        </LinearLayout>\r\n        <LinearLayout\r\n            android:id=\"@+id/to_setting\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"8dp\"\r\n            android:layout_marginLeft=\"8dp\"\r\n            android:layout_marginTop=\"25dp\"\r\n            android:layout_marginRight=\"8dp\"\r\n            android:paddingLeft=\"5dp\"\r\n            android:paddingTop=\"5dp\"\r\n            android:paddingBottom=\"5dp\"\r\n            android:orientation=\"horizontal\"\r\n            android:background=\"@drawable/buttonshape3\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\">\r\n            <ImageView\r\n                android:layout_width=\"50dp\"\r\n                android:layout_height=\"50dp\"\r\n                android:layout_marginLeft=\"9dp\"\r\n                android:background=\"@drawable/setting1_2\"\r\n                android:layout_gravity=\"center_vertical\"/>\r\n            <TextView\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"50dp\"\r\n                android:layout_marginStart=\"10dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:text=\"@string/setting\"\r\n                android:textColor=\"#FFE607\"\r\n                android:textStyle=\"bold\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:gravity=\"center_vertical\"\r\n                android:textSize=\"32sp\"/>\r\n        </LinearLayout>\r\n        <LinearLayout\r\n            android:id=\"@+id/to_cuscen\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"8dp\"\r\n            android:layout_marginLeft=\"8dp\"\r\n            android:layout_marginTop=\"25dp\"\r\n            android:layout_marginRight=\"8dp\"\r\n            android:paddingLeft=\"5dp\"\r\n            android:paddingTop=\"5dp\"\r\n            android:paddingBottom=\"5dp\"\r\n            android:paddingRight=\"15dp\"\r\n            android:orientation=\"horizontal\"\r\n            android:background=\"@drawable/buttonshape3\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\">\r\n            <ImageView\r\n                android:layout_width=\"50dp\"\r\n                android:layout_height=\"50dp\"\r\n                android:layout_marginLeft=\"9dp\"\r\n                android:background=\"@drawable/cuscen1_1\"\r\n                android:layout_gravity=\"center_vertical\"/>\r\n            <TextView\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"50dp\"\r\n                android:layout_marginStart=\"10dp\"\r\n                android:layout_marginLeft=\"10dp\"\r\n                android:text=\"@string/customer_center\"\r\n                android:textColor=\"#FFE607\"\r\n                android:textStyle=\"bold\"\r\n                android:layout_gravity=\"center_vertical\"\r\n                android:gravity=\"center_vertical\"\r\n                android:textSize=\"32sp\"/>\r\n        </LinearLayout>\r\n    </LinearLayout>\r\n\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_mypage.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/res/layout/activity_mypage.xml	(date 1605504905097)
+@@ -11,177 +11,187 @@
+     tools:context=".Mypage">
+ 
+     <LinearLayout
+-        android:id="@+id/mypage_linearLayout1"
+         android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:orientation="horizontal"
+-        android:background="#FFE607"
+-        app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintTop_toTopOf="parent">
+-        <ImageView
+-            android:id="@+id/iv_profile"
+-            android:layout_width="100dp"
+-            android:layout_height="100dp"
+-            android:layout_marginStart="20dp"
+-            android:layout_marginLeft="20dp"
+-            android:layout_marginTop="10dp"
+-            android:layout_marginBottom="10dp"
+-            android:background="@drawable/buttonshape4"
+-            android:layout_gravity="center_vertical"
+-            app:layout_constraintEnd_toStartOf="@+id/tv_name"
+-            app:layout_constraintStart_toStartOf="parent"
+-            app:layout_constraintTop_toTopOf="parent"
+-            app:srcCompat="@drawable/ic_launcher_foreground" />
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:weightSum="1">
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".18"
++            android:weightSum="1"
++            android:orientation="horizontal"
++            android:background="#FFE607"
++            app:layout_constraintStart_toStartOf="parent"
++            app:layout_constraintTop_toTopOf="parent">
++            <ImageView
++                android:id="@+id/iv_profile"
++                android:layout_width="0dp"
++                android:layout_height="match_parent"
++                android:layout_weight=".3"
++                android:layout_marginStart="20dp"
++                android:layout_marginLeft="20dp"
++                android:layout_marginTop="10dp"
++                android:layout_marginBottom="10dp"
++                android:padding="5dp"
++                android:background="@drawable/buttonshape4"
++                android:layout_gravity="center_vertical"
++                app:layout_constraintEnd_toStartOf="@+id/tv_name"
++                app:layout_constraintStart_toStartOf="parent"
++                app:layout_constraintTop_toTopOf="parent"
++                app:srcCompat="@drawable/ic_launcher_foreground" />
+ 
+-        <LinearLayout
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:orientation="vertical"
+-            android:layout_marginTop="10dp"
+-            android:paddingRight="15dp"
+-            android:paddingLeft="15dp"
+-            android:layout_marginLeft="15dp"
+-            android:background="@drawable/buttonshape4">
+-            <TextView
+-                android:id="@+id/tv_myach"
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content"
+-                android:layout_marginTop="5dp"
+-                android:gravity="center"
+-                android:layout_gravity="center"
+-                android:text="매 일 노 력 하 는 자"
+-                android:textColor="#575757"
+-                android:textStyle="bold"
+-                android:textSize="28sp" />
+-            <TextView
+-                android:id="@+id/tv_name"
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content"
+-                android:layout_marginTop="5dp"
+-                android:layout_marginBottom="5dp"
+-                android:gravity="center"
+-                android:layout_gravity="center"
+-                android:text="I D"
+-                android:textColor="#575757"
+-                android:textStyle="bold"
+-                android:textSize="36sp" />
+-        </LinearLayout>
+-    </LinearLayout>
+-
+-    <LinearLayout
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:layout_marginStart="8dp"
+-        android:layout_marginLeft="8dp"
+-        android:layout_marginTop="5dp"
+-        android:orientation="vertical"
+-        app:layout_constraintEnd_toEndOf="parent"
+-        app:layout_constraintStart_toStartOf="parent"
+-        android:gravity="center_vertical"
+-        app:layout_constraintTop_toBottomOf="@+id/mypage_linearLayout1">
+-        <LinearLayout
+-            android:id="@+id/achiv"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:layout_marginStart="8dp"
+-            android:layout_marginLeft="8dp"
+-            android:layout_marginTop="5dp"
+-            android:paddingLeft="5dp"
+-            android:paddingTop="5dp"
+-            android:paddingBottom="5dp"
+-            android:layout_marginRight="8dp"
+-            android:orientation="horizontal"
+-            android:background="@drawable/buttonshape3"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent">
++            <LinearLayout
++                android:layout_width="0dp"
++                android:layout_height="match_parent"
++                android:layout_weight=".65"
++                android:orientation="vertical"
++                android:layout_marginTop="10dp"
++                android:paddingRight="15dp"
++                android:paddingLeft="15dp"
++                android:layout_marginLeft="15dp"
++                android:background="@drawable/buttonshape4">
++                <TextView
++                    android:id="@+id/tv_myach"
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="15dp"
++                    android:gravity="center"
++                    android:layout_gravity="center"
++                    android:text="매 일 노 력 하 는 자"
++                    android:textColor="#575757"
++                    android:textStyle="bold"
++                    android:textSize="24sp" />
++                <TextView
++                    android:id="@+id/tv_name"
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="10dp"
++                    android:layout_marginBottom="5dp"
++                    android:gravity="center"
++                    android:layout_gravity="center"
++                    android:text="I D"
++                    android:textColor="#575757"
++                    android:textStyle="bold"
++                    android:textSize="34sp" />
++            </LinearLayout>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".82"
++            android:layout_marginStart="8dp"
++            android:layout_marginLeft="8dp"
++            android:layout_marginTop="5dp"
++            android:orientation="vertical"
++            android:weightSum="1"
++            app:layout_constraintEnd_toEndOf="parent"
++            app:layout_constraintStart_toStartOf="parent"
++            android:gravity="center_vertical">
++            <LinearLayout
++                android:layout_width="wrap_content"
++                android:layout_height="0dp"
++                android:layout_weight=".12"
++                android:layout_marginStart="8dp"
++                android:layout_marginLeft="8dp"
++                android:layout_marginTop="5dp"
++                android:paddingLeft="5dp"
++                android:paddingTop="5dp"
++                android:paddingBottom="5dp"
++                android:layout_marginRight="8dp"
++                android:orientation="horizontal"
++                android:background="@drawable/buttonshape3"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent">
+ 
+-            <ImageView
+-                android:layout_width="50dp"
+-                android:layout_height="50dp"
+-                android:layout_marginLeft="9dp"
+-                android:background="@drawable/crown3_1"
+-                android:layout_gravity="center_vertical"/>
+-            <TextView
+-                android:layout_width="wrap_content"
+-                android:layout_height="50dp"
+-                android:layout_marginStart="10dp"
+-                android:layout_marginLeft="10dp"
+-                android:text="@string/achievement"
+-                android:textColor="#FFE607"
+-                android:textStyle="bold"
+-                android:layout_gravity="center_vertical"
+-                android:gravity="center_vertical"
+-                android:textSize="32sp"/>
+-        </LinearLayout>
+-        <LinearLayout
+-            android:orientation="horizontal"
+-            android:layout_width="wrap_content"
+-            android:layout_height="120dp">
+-            <Button
+-                android:id="@+id/ach1"
+-                android:layout_width="120dp"
+-                android:layout_height="100dp"
+-                android:layout_marginStart="10dp"
+-                android:layout_marginLeft="10dp"
+-                android:layout_marginTop="10dp"
+-                android:gravity="center"
+-                android:text="매일노력\n하는자"
+-                android:textColor="#575757"
+-                android:textScaleX="1.05"
+-                android:layout_gravity="center_vertical"
+-                android:textSize="25sp"
+-                android:background="@drawable/buttonshape4">
+-            </Button>
+-            <Button
+-                android:id="@+id/ach2"
+-                android:layout_width="120dp"
+-                android:layout_height="100dp"
+-                android:layout_marginLeft="10dp"
+-                android:layout_marginTop="10dp"
+-                android:gravity="center"
+-                android:text="스쿼트\n중수"
+-                android:textColor="#FFE607"
+-                android:layout_gravity="center_vertical"
+-                android:textSize="25sp"
+-                android:background="@drawable/buttonshape3">
+-            </Button>
+-            <Button
+-                android:id="@+id/ach3"
+-                android:layout_width="120dp"
+-                android:layout_height="100dp"
+-                android:layout_marginLeft="10dp"
+-                android:layout_marginTop="10dp"
+-                android:gravity="center"
+-                android:text="연승가도"
+-                android:textColor="#FFE607"
+-                android:layout_gravity="center_vertical"
+-                android:textSize="25sp"
+-                android:background="@drawable/buttonshape3">
+-            </Button>
+-        </LinearLayout>
+-        <LinearLayout
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:layout_marginStart="8dp"
+-            android:layout_marginLeft="8dp"
+-            android:layout_marginTop="25dp"
+-            android:layout_marginRight="8dp"
+-            android:paddingLeft="5dp"
+-            android:paddingTop="5dp"
+-            android:paddingBottom="5dp"
+-            android:orientation="horizontal"
+-            android:background="@drawable/buttonshape3"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent">
++                <ImageView
++                    android:layout_width="45dp"
++                    android:layout_height="45dp"
++                    android:layout_marginLeft="9dp"
++                    android:background="@drawable/crown3_1"
++                    android:layout_gravity="center_vertical"/>
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="45dp"
++                    android:layout_marginStart="10dp"
++                    android:layout_marginLeft="10dp"
++                    android:text="@string/achievement"
++                    android:textColor="#FFE607"
++                    android:textStyle="bold"
++                    android:layout_gravity="center_vertical"
++                    android:gravity="center_vertical"
++                    android:textSize="32sp"/>
++            </LinearLayout>
++            <LinearLayout
++                android:orientation="horizontal"
++                android:layout_width="wrap_content"
++                android:layout_height="0dp"
++                android:layout_weight=".25">
++                <Button
++                    android:id="@+id/ach1"
++                    android:layout_width="120dp"
++                    android:layout_height="100dp"
++                    android:layout_marginStart="10dp"
++                    android:layout_marginLeft="10dp"
++                    android:layout_marginTop="5dp"
++                    android:gravity="center"
++                    android:text="매 일 노 력 하 는 자"
++                    android:textColor="#575757"
++                    android:layout_gravity="center_vertical"
++                    android:textSize="25sp"
++                    android:background="@drawable/buttonshape4">
++                </Button>
++                <Button
++                    android:id="@+id/ach2"
++                    android:layout_width="120dp"
++                    android:layout_height="100dp"
++                    android:layout_marginLeft="10dp"
++                    android:layout_marginTop="5dp"
++                    android:gravity="center"
++                    android:text="스 쿼 트    중 수"
++                    android:textColor="#FFE607"
++                    android:layout_gravity="center_vertical"
++                    android:textSize="25sp"
++                    android:background="@drawable/buttonshape3">
++                </Button>
++                <Button
++                    android:id="@+id/ach3"
++                    android:layout_width="120dp"
++                    android:layout_height="100dp"
++                    android:layout_marginLeft="10dp"
++                    android:layout_marginTop="5dp"
++                    android:gravity="center"
++                    android:text="연 승 가 도"
++                    android:textColor="#FFE607"
++                    android:layout_gravity="center_vertical"
++                    android:textSize="25sp"
++                    android:background="@drawable/buttonshape3">
++                </Button>
++            </LinearLayout>
++            <LinearLayout
++                android:layout_width="wrap_content"
++                android:layout_height="0dp"
++                android:layout_weight=".12"
++                android:layout_marginStart="8dp"
++                android:layout_marginLeft="8dp"
++                android:layout_marginTop="20dp"
++                android:layout_marginRight="8dp"
++                android:paddingLeft="5dp"
++                android:paddingTop="5dp"
++                android:paddingBottom="5dp"
++                android:orientation="horizontal"
++                android:background="@drawable/buttonshape3"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent">
+                 <ImageView
+                     android:layout_width="45dp"
+-                    android:layout_height="50dp"
++                    android:layout_height="45dp"
+                     android:layout_marginLeft="9dp"
+                     android:background="@drawable/myrecord1_1"
+                     android:layout_gravity="center_vertical"/>
+                 <TextView
+                     android:layout_width="wrap_content"
+-                    android:layout_height="50dp"
++                    android:layout_height="45dp"
+                     android:layout_marginStart="10dp"
+                     android:layout_marginLeft="10dp"
+                     android:text="@string/record"
+@@ -190,118 +200,126 @@
+                     android:gravity="center_vertical"
+                     android:layout_gravity="center_vertical"
+                     android:textSize="32sp"/>
+-        </LinearLayout>
+-        <LinearLayout
+-            android:orientation="horizontal"
+-            android:layout_width="wrap_content"
+-            android:layout_height="120dp">
+-            <Button
+-                android:id="@+id/rec1"
+-                android:layout_width="120dp"
+-                android:layout_height="100dp"
+-                android:layout_marginStart="10dp"
+-                android:layout_marginLeft="10dp"
+-                android:layout_marginTop="10dp"
+-                android:gravity="center"
+-                android:text="스쿼트\n개수"
+-                android:textColor="@color/button_selector1"
+-                android:layout_gravity="center_vertical"
+-                android:textSize="25sp"
+-                android:background="@drawable/buttonshape3">
+-            </Button>
+-            <Button
+-                android:id="@+id/rec2"
+-                android:layout_width="120dp"
+-                android:layout_height="100dp"
+-                android:layout_marginLeft="10dp"
+-                android:layout_marginTop="10dp"
+-                android:gravity="center"
+-                android:text="최단시간"
+-                android:textColor="@color/button_selector1"
+-                android:layout_gravity="center_vertical"
+-                android:textSize="25sp"
+-                android:background="@drawable/buttonshape3">
+-            </Button>
+-            <Button
+-                android:id="@+id/rec3"
+-                android:layout_width="120dp"
+-                android:layout_height="100dp"
+-                android:layout_marginLeft="10dp"
+-                android:layout_marginTop="10dp"
+-                android:gravity="center"
+-                android:text="SOLO\nSTAGE"
+-                android:textColor="@color/button_selector1"
+-                android:layout_gravity="center_vertical"
+-                android:textSize="25sp"
+-                android:background="@drawable/buttonshape3">
+-            </Button>
+-        </LinearLayout>
+-        <LinearLayout
+-            android:id="@+id/to_setting"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:layout_marginStart="8dp"
+-            android:layout_marginLeft="8dp"
+-            android:layout_marginTop="25dp"
+-            android:layout_marginRight="8dp"
+-            android:paddingLeft="5dp"
+-            android:paddingTop="5dp"
+-            android:paddingBottom="5dp"
+-            android:orientation="horizontal"
+-            android:background="@drawable/buttonshape3"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent">
+-            <ImageView
+-                android:layout_width="50dp"
+-                android:layout_height="50dp"
+-                android:layout_marginLeft="9dp"
+-                android:background="@drawable/setting1_2"
+-                android:layout_gravity="center_vertical"/>
+-            <TextView
+-                android:layout_width="wrap_content"
+-                android:layout_height="50dp"
+-                android:layout_marginStart="10dp"
+-                android:layout_marginLeft="10dp"
+-                android:text="@string/setting"
+-                android:textColor="#FFE607"
+-                android:textStyle="bold"
+-                android:layout_gravity="center_vertical"
+-                android:gravity="center_vertical"
+-                android:textSize="32sp"/>
+-        </LinearLayout>
+-        <LinearLayout
+-            android:id="@+id/to_cuscen"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content"
+-            android:layout_marginStart="8dp"
+-            android:layout_marginLeft="8dp"
+-            android:layout_marginTop="25dp"
+-            android:layout_marginRight="8dp"
+-            android:paddingLeft="5dp"
+-            android:paddingTop="5dp"
+-            android:paddingBottom="5dp"
+-            android:paddingRight="15dp"
+-            android:orientation="horizontal"
+-            android:background="@drawable/buttonshape3"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent">
+-            <ImageView
+-                android:layout_width="50dp"
+-                android:layout_height="50dp"
+-                android:layout_marginLeft="9dp"
+-                android:background="@drawable/cuscen1_1"
+-                android:layout_gravity="center_vertical"/>
+-            <TextView
+-                android:layout_width="wrap_content"
+-                android:layout_height="50dp"
+-                android:layout_marginStart="10dp"
+-                android:layout_marginLeft="10dp"
+-                android:text="@string/customer_center"
+-                android:textColor="#FFE607"
+-                android:textStyle="bold"
+-                android:layout_gravity="center_vertical"
+-                android:gravity="center_vertical"
+-                android:textSize="32sp"/>
++            </LinearLayout>
++            <LinearLayout
++                android:orientation="horizontal"
++                android:layout_width="wrap_content"
++                android:layout_height="0dp"
++                android:layout_weight=".25">
++                <Button
++                    android:id="@+id/rec1"
++                    android:layout_width="120dp"
++                    android:layout_height="100dp"
++                    android:layout_marginStart="10dp"
++                    android:layout_marginLeft="10dp"
++                    android:layout_marginTop="5dp"
++                    android:gravity="center"
++                    android:text="스쿼트\n개수"
++                    android:textColor="#FFE607"
++                    android:layout_gravity="center_vertical"
++                    android:textSize="25sp"
++                    android:background="@drawable/buttonshape3">
++                </Button>
++                <Button
++                    android:id="@+id/rec2"
++                    android:layout_width="120dp"
++                    android:layout_height="100dp"
++                    android:layout_marginLeft="10dp"
++                    android:layout_marginTop="5dp"
++                    android:gravity="center"
++                    android:text="최단시간"
++                    android:textColor="#FFE607"
++                    android:layout_gravity="center_vertical"
++                    android:textSize="25sp"
++                    android:background="@drawable/buttonshape3">
++                </Button>
++                <Button
++                    android:id="@+id/rec3"
++                    android:layout_width="120dp"
++                    android:layout_height="100dp"
++                    android:layout_marginLeft="10dp"
++                    android:layout_marginTop="5dp"
++                    android:gravity="center"
++                    android:text="SOLO\nSTAGE"
++                    android:textColor="#FFE607"
++                    android:layout_gravity="center_vertical"
++                    android:textSize="25sp"
++                    android:background="@drawable/buttonshape3">
++                </Button>
++            </LinearLayout>
++            <LinearLayout
++                android:id="@+id/to_setting"
++                android:layout_width="wrap_content"
++                android:layout_height="0dp"
++                android:layout_weight=".12"
++                android:layout_marginStart="8dp"
++                android:layout_marginLeft="8dp"
++                android:layout_marginTop="20dp"
++                android:layout_marginRight="8dp"
++                android:paddingLeft="5dp"
++                android:paddingTop="5dp"
++                android:paddingBottom="5dp"
++                android:orientation="horizontal"
++                android:background="@drawable/buttonshape3"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent">
++                <ImageView
++                    android:layout_width="45dp"
++                    android:layout_height="45dp"
++                    android:layout_marginLeft="9dp"
++                    android:background="@drawable/setting1_2"
++                    android:layout_gravity="center_vertical"/>
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="45dp"
++                    android:layout_marginStart="10dp"
++                    android:layout_marginLeft="10dp"
++                    android:text="@string/setting"
++                    android:textColor="#FFE607"
++                    android:textStyle="bold"
++                    android:layout_gravity="center_vertical"
++                    android:gravity="center_vertical"
++                    android:textSize="32sp"/>
++            </LinearLayout>
++            <LinearLayout
++                android:layout_width="wrap_content"
++                android:layout_height="0dp"
++                android:layout_weight=".12"
++                android:layout_marginStart="8dp"
++                android:layout_marginLeft="8dp"
++                android:layout_marginTop="20dp"
++                android:layout_marginRight="8dp"
++                android:paddingLeft="5dp"
++                android:paddingTop="5dp"
++                android:paddingBottom="5dp"
++                android:paddingRight="15dp"
++                android:orientation="horizontal"
++                android:background="@drawable/buttonshape3"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent">
++                <ImageView
++                    android:id="@+id/to_cuscen"
++                    android:layout_width="45dp"
++                    android:layout_height="45dp"
++                    android:layout_marginLeft="9dp"
++                    android:background="@drawable/cuscen1_1"
++                    android:layout_gravity="center_vertical"/>
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="45dp"
++                    android:layout_marginStart="10dp"
++                    android:layout_marginLeft="10dp"
++                    android:text="@string/customer_center"
++                    android:textColor="#FFE607"
++                    android:textStyle="bold"
++                    android:layout_gravity="center_vertical"
++                    android:gravity="center_vertical"
++                    android:textSize="32sp"/>
++            </LinearLayout>
++            <ImageView
++                android:layout_width="match_parent"
++                android:layout_height="0dp"
++                android:layout_weight=".02"/>
+         </LinearLayout>
+     </LinearLayout>
+ 
+Index: app/src/main/java/com/example/squatchallenge/team_play.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.squatchallenge;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.app.ActivityCompat;\r\nimport androidx.core.content.ContextCompat;\r\n\r\nimport android.Manifest;\r\nimport android.app.Activity;\r\nimport android.content.Intent;\r\nimport android.content.pm.PackageManager;\r\nimport android.content.res.AssetFileDescriptor;\r\nimport android.graphics.Bitmap;\r\nimport android.graphics.BitmapFactory;\r\nimport android.graphics.Color;\r\nimport android.graphics.Matrix;\r\nimport android.hardware.Camera;\r\nimport android.net.Uri;\r\nimport android.os.Build;\r\nimport android.os.Bundle;\r\nimport android.os.CountDownTimer;\r\nimport android.os.Handler;\r\nimport android.os.Message;\r\nimport android.os.SystemClock;\r\nimport android.preference.PreferenceManager;\r\nimport android.view.SurfaceHolder;\r\nimport android.view.Window;\r\nimport android.view.WindowManager;\r\nimport android.widget.Button;\r\nimport android.widget.ImageView;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport com.firebase.ui.storage.images.FirebaseImageLoader;\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.OnFailureListener;\r\nimport com.google.android.gms.tasks.OnSuccessListener;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\nimport com.google.firebase.storage.FirebaseStorage;\r\nimport com.google.firebase.storage.StorageReference;\r\nimport com.google.firebase.storage.UploadTask;\r\n\r\nimport org.tensorflow.lite.Interpreter;\r\n\r\nimport java.io.ByteArrayOutputStream;\r\nimport java.io.File;\r\nimport java.io.FileInputStream;\r\nimport java.io.FileOutputStream;\r\nimport java.io.IOException;\r\nimport java.io.OutputStream;\r\nimport java.nio.MappedByteBuffer;\r\nimport java.nio.channels.FileChannel;\r\nimport java.util.Iterator;\r\n\r\nimport com.bumptech.glide.Glide;\r\n\r\npublic class team_play extends AppCompatActivity implements Camera.PreviewCallback {\r\n\r\n    //preview 화면 저장을 위해\r\n    FirebaseStorage storage = FirebaseStorage.getInstance();\r\n    StorageReference storageRef = storage.getReference();\r\n    StorageReference childRef;\r\n    public ImageView iv_team;\r\n    public int save_index = 0;\r\n    public int read_index = 0;\r\n    public boolean write = false;\r\n    public boolean read = false;\r\n\r\n    //카운트를 위해(시간)\r\n    public TextView tv_timer;\r\n    private CountDownTimer countDownTimer;\r\n    private long start_time, now_time, overTime;\r\n    private boolean game_end = false;\r\n    private boolean game_start = false;\r\n\r\n    //DB접근을 위해\r\n    DatabaseReference DB_speed;\r\n    DatabaseReference DB_total;\r\n    String email = \"\";\r\n\r\n    //카메라를 위해\r\n    private static CameraPreview surfaceView;\r\n    private SurfaceHolder holder;\r\n    private static Button camera_preview_button;\r\n    private static Camera mCamera;\r\n    private int RESULT_PERMISSIONS = 100;\r\n    public static team_play getInstance;\r\n    //모델 판단을 위해\r\n    Interpreter tflite;\r\n    public TextView tv_result;\r\n    public TextView tv_count;\r\n    public int count = 0;\r\n    public int[] arr = new int[3];      //0(up) 1(down)\r\n    public int index = 0;\r\n    public boolean up = true;\r\n    public boolean down = false;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n\r\n        //이메일을 알고있어야 db연동\r\n        Intent intent = getIntent();\r\n        email = intent.getStringExtra(\"Email\");        //구글이메일\r\n\r\n        // 카메라 프리뷰를  전체화면으로 보여주기 위해 셋팅한다.\r\n        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);\r\n        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,\r\n                WindowManager.LayoutParams.FLAG_FULLSCREEN);\r\n\r\n        //모델 로드\r\n        tflite = getTfliteInterpreter(\"model.tflite\");\r\n\r\n\r\n        // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.\r\n        requestPermissionCamera();\r\n\r\n        //카운트 시작 (준비시간 5초)\r\n        tv_timer = findViewById(R.id.tv_timer);\r\n        countDownTimer();\r\n        countDownTimer.start();\r\n\r\n    }\r\n\r\n    //카운트를 위해\r\n    public void countDownTimer() {\r\n        countDownTimer = new CountDownTimer(1000, 1000) {\r\n            @Override\r\n            public void onTick(long l) {\r\n                //0초면 토스트 메세지 띄운다\r\n                if (l / 1000 == 0) {\r\n                    Toast.makeText(getApplicationContext(), \"Start!\", Toast.LENGTH_SHORT).show();\r\n                } else tv_timer.setText(Long.toString(l / 1000));\r\n            }\r\n\r\n            @Override\r\n            public void onFinish() {\r\n                //0.0부터 타이머가 시작해야하므로\r\n                start_time = SystemClock.elapsedRealtime();\r\n                game_start = true;\r\n                handler.sendEmptyMessage(0);\r\n            }\r\n        };\r\n    }\r\n\r\n    //카운터 계산부분\r\n    private String getTime() {\r\n        //게임이 종료되지 않았다면\r\n        //경과된 시간 체크\r\n        now_time = SystemClock.elapsedRealtime();\r\n        //시스템이 부팅된 이후의 시간?\r\n        overTime = now_time - start_time;\r\n\r\n        long m = overTime / 1000 / 60;\r\n        long s = (overTime / 1000) % 60;\r\n\r\n        long ms = overTime % 1000;\r\n\r\n        //3분 넘어가면 게임종료\r\n        if (m >= 3) game_end = true;\r\n\r\n        String recTime = String.format(\"%d:%02d:%03d\", m, s, ms);\r\n\r\n        return recTime;\r\n    }\r\n\r\n    //handler (카운터)\r\n    Handler handler = new Handler() {\r\n        @Override\r\n        public void handleMessage(@NonNull Message msg) {\r\n            tv_timer.setText(getTime());\r\n\r\n            //우선 내화면을 iv_team에 넣어보자\r\n            //1.ONE_MEGABYTE에 이미지 byte를 저장\r\n            childRef = storageRef.child(email + save_index + \".jpg\");\r\n            final long ONE_MEGABYTE = 1024 * 1024;\r\n            childRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {\r\n                @Override\r\n                public void onSuccess(byte[] bytes) {\r\n                    // Data for \"images/island.jpg\" is returns, use this as needed\r\n                    //2. byte를 bitmap으로 변환\r\n                    Bitmap team_bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);\r\n                    //3. iv_team update\r\n                    iv_team = findViewById(R.id.iv_team);\r\n                    iv_team.setImageBitmap(team_bitmap);\r\n                }\r\n            }).addOnFailureListener(new OnFailureListener() {\r\n                @Override\r\n                public void onFailure(@NonNull Exception exception) {\r\n                    // Handle any errors\r\n                }\r\n            });\r\n            if (!game_end) handler.sendEmptyMessage(0);\r\n        }\r\n    };\r\n\r\n    //판단 (up,down) 카운팅\r\n    public void determine(int n) {\r\n        if (index == 0 || index == 1) {\r\n            arr[index] = n;\r\n            index++;\r\n        }\r\n        //index가 2이면 마지막꺼만 비어있는 상태\r\n        else {\r\n            //우선 넣어주고\r\n            arr[index] = n;\r\n            //판단\r\n            if (arr[0] == arr[1] && arr[1] == arr[2]) {\r\n                //down이 true인 상태에서 up인상태이면 count++\r\n                if (arr[0] == 0) {\r\n                    if (down) {\r\n                        down = false;\r\n                        count++;\r\n                        tv_count = findViewById(R.id.tv_count);\r\n                        tv_count.setText(Integer.toString(count));\r\n\r\n                        //10개 채웠으면 game_end!\r\n                        if (count >= 10) game_end = true;\r\n                    }\r\n                }\r\n                //down\r\n                else {\r\n                    down = true;\r\n                }\r\n            }\r\n            //앞에껄 지우고 옮겨줌\r\n            arr[0] = arr[1];\r\n            arr[1] = arr[2];\r\n            arr[2] = -1;\r\n        }\r\n    }\r\n\r\n    //total_count 와 speed_time update\r\n    public void updateRecord() {\r\n        //String[] s = {\"/speed_time\", \"/total_count\"};\r\n        //speed_time\r\n        DB_speed = FirebaseDatabase.getInstance().getReference(\"/users/\" + email + \"/speed_time\");         //해당 아이디 값들 조회\r\n        DB_speed.addListenerForSingleValueEvent(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                //만약 더빠르다면 update\r\n                long result = (long) snapshot.getValue();\r\n                if (result > overTime) {\r\n                    DB_speed.setValue(overTime);\r\n                }\r\n            }\r\n\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n        //total_count\r\n        DB_total = FirebaseDatabase.getInstance().getReference(\"/users/\" + email + \"/total_count\");         //해당 아이디 값들 조회\r\n        DB_total.addListenerForSingleValueEvent(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                long result = (long) snapshot.getValue();\r\n                result += count;\r\n                DB_total.setValue(result);\r\n            }\r\n\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n    }\r\n\r\n    //frame을 storage에 저장하는 함수\r\n    public void saveFrame(byte[] data) {\r\n        childRef = storageRef.child(email + save_index + \".jpg\");\r\n        UploadTask uploadTask = childRef.putBytes(data);\r\n        uploadTask.addOnFailureListener(new OnFailureListener() {\r\n            @Override\r\n            public void onFailure(@NonNull Exception exception) {\r\n            }\r\n        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {\r\n            @Override\r\n            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {\r\n            }\r\n        });\r\n    }\r\n\r\n    //iv_team update 실시간 협력을 위해\r\n    public void printFrame() {\r\n        //우선 내화면을 iv_team에 넣어보자\r\n        //1.ONE_MEGABYTE에 이미지 byte를 저장\r\n        childRef = storageRef.child(email + save_index + \".jpg\");\r\n        final long ONE_MEGABYTE = 1024 * 1024;\r\n        childRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {\r\n            @Override\r\n            public void onSuccess(byte[] bytes) {\r\n                // Data for \"images/island.jpg\" is returns, use this as needed\r\n                //2. byte를 bitmap으로 변환\r\n                Bitmap team_bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);\r\n                //3. iv_team update\r\n                iv_team = findViewById(R.id.iv_team);\r\n                iv_team.setImageBitmap(team_bitmap);\r\n            }\r\n        }).addOnFailureListener(new OnFailureListener() {\r\n            @Override\r\n            public void onFailure(@NonNull Exception exception) {\r\n                // Handle any errors\r\n            }\r\n        });\r\n    }\r\n\r\n    //Frame마다 처리\r\n    @Override\r\n    public void onPreviewFrame(byte[] bytes, Camera camera) {\r\n        //결과값 출력을 위해\r\n        tv_result = findViewById(R.id.tv_result);\r\n        tv_count = findViewById(R.id.tv_count);\r\n        //게임이 끝나면\r\n        if (game_end) {\r\n            updateRecord();                 //db의 total_count 와 speed_time update\r\n            Toast.makeText(getApplicationContext(), \"game end!\", Toast.LENGTH_SHORT).show();\r\n            surfaceView.surfaceDestroyed(holder);       //preview 종료\r\n            team_play.this.finish();      //액티비티 종료\r\n        }\r\n        //게임 끝이 아니고 게임이 시작됐다면(게임중이라면)\r\n        else if (game_start) {\r\n            Camera.Parameters params = mCamera.getParameters();\r\n\r\n            int w = params.getPreviewSize().width;\r\n            int h = params.getPreviewSize().height;\r\n            final int[] rgb = decodeYUV420SP(bytes, w, h);\r\n            Bitmap bmp = Bitmap.createBitmap(rgb, w, h, Bitmap.Config.ARGB_8888);\r\n\r\n            //모델적용을 위해 resize\r\n            bmp = Bitmap.createScaledBitmap(bmp, 224, 224, false);\r\n            Matrix rotateMatrix = new Matrix();\r\n            rotateMatrix.postRotate(90);\r\n            bmp = Bitmap.createBitmap(bmp, 0, 0,\r\n                    224, 224, rotateMatrix, false);\r\n\r\n            //요쯤에서 storage에 upload\r\n            ByteArrayOutputStream baos = new ByteArrayOutputStream();\r\n            bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);\r\n            byte[] data = baos.toByteArray();\r\n            childRef = storageRef.child(email + save_index + \".jpg\");\r\n            UploadTask uploadTask = childRef.putBytes(data);\r\n            uploadTask.addOnFailureListener(new OnFailureListener() {\r\n                @Override\r\n                public void onFailure(@NonNull Exception exception) {\r\n                }\r\n            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {\r\n                @Override\r\n                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {\r\n                }\r\n            });\r\n            //모델 적용을 위해\r\n            float[][][][] inputs = new float[1][224][224][3];       //1 * width * height * RGB\r\n            float[][] outputs = new float[1][2];\r\n            for (int x = 0; x < 224; x++) {\r\n                for (int y = 0; y < 224; y++) {\r\n                    int pixel = bmp.getPixel(x, y);\r\n                    inputs[0][y][x][0] = (Color.red(pixel)) / 255.0f;\r\n                    inputs[0][y][x][1] = (Color.green(pixel)) / 255.0f;\r\n                    inputs[0][y][x][2] = (Color.blue(pixel)) / 255.0f;\r\n                }\r\n            }\r\n            tflite.run(inputs, outputs);\r\n\r\n            //서있을때\r\n            if (outputs[0][0] > outputs[0][1]) {\r\n                tv_result.setText(\"up\");\r\n                determine(0);\r\n            }\r\n            //앉아있을때\r\n            else {\r\n                tv_result.setText(\"down\");\r\n                determine(1);\r\n            }\r\n\r\n\r\n        }\r\n    }\r\n\r\n    //bytes에서 rgb정보 추출\r\n    public int[] decodeYUV420SP(byte[] yuv420sp, int width, int height) {\r\n\r\n        final int frameSize = width * height;\r\n\r\n        int rgb[] = new int[width * height];\r\n        for (int j = 0, yp = 0; j < height; j++) {\r\n            int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;\r\n            for (int i = 0; i < width; i++, yp++) {\r\n                int y = (0xff & ((int) yuv420sp[yp])) - 16;\r\n                if (y < 0) y = 0;\r\n                if ((i & 1) == 0) {\r\n                    v = (0xff & yuv420sp[uvp++]) - 128;\r\n                    u = (0xff & yuv420sp[uvp++]) - 128;\r\n                }\r\n\r\n                int y1192 = 1192 * y;\r\n                int r = (y1192 + 1634 * v);\r\n                int g = (y1192 - 833 * v - 400 * u);\r\n                int b = (y1192 + 2066 * u);\r\n\r\n                if (r < 0) r = 0;\r\n                else if (r > 262143) r = 262143;\r\n                if (g < 0) g = 0;\r\n                else if (g > 262143) g = 262143;\r\n                if (b < 0) b = 0;\r\n                else if (b > 262143) b = 262143;\r\n\r\n                rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) &\r\n                        0xff00) | ((b >> 10) & 0xff);\r\n\r\n            }\r\n        }\r\n        return rgb;\r\n    }\r\n\r\n    //카메라 부분\r\n    public static Camera getCamera() {\r\n        return mCamera;\r\n    }\r\n\r\n    private void setInit() {\r\n        getInstance = this;\r\n\r\n        // 카메라 객체를 R.layout.activity_main의 레이아웃에 선언한 SurfaceView에서 먼저 정의해야 함으로 setContentView 보다 먼저 정의한다.\r\n        mCamera = Camera.open();\r\n\r\n        setContentView(R.layout.activity_team_play);\r\n\r\n        // SurfaceView를 상속받은 레이아웃을 정의한다.\r\n        surfaceView = (CameraPreview) findViewById(R.id.preview);\r\n        //리스너 설정\r\n        mCamera.setPreviewCallback(this::onPreviewFrame);\r\n        // SurfaceView 정의 - holder와 Callback을 정의한다.\r\n        holder = surfaceView.getHolder();\r\n        holder.addCallback(surfaceView);\r\n        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);\r\n    }\r\n\r\n    //허가\r\n    private boolean requestPermissionCamera() {\r\n        int sdkVersion = Build.VERSION.SDK_INT;\r\n        if (sdkVersion >= Build.VERSION_CODES.M) {\r\n\r\n            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {\r\n\r\n                ActivityCompat.requestPermissions(team_play.this,\r\n                        new String[]{Manifest.permission.CAMERA},\r\n                        RESULT_PERMISSIONS);\r\n\r\n            } else {\r\n                setInit();\r\n            }\r\n        } else {  // version 6 이하일때\r\n            setInit();\r\n            return true;\r\n        }\r\n\r\n        return true;\r\n    }\r\n\r\n    @Override\r\n    public void onRequestPermissionsResult(int requestCode,\r\n                                           String permissions[], int[] grantResults) {\r\n\r\n        if (RESULT_PERMISSIONS == requestCode) {\r\n\r\n            if (grantResults.length > 0\r\n                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {\r\n                // 권한 허가시\r\n                setInit();\r\n            } else {\r\n                // 권한 거부시\r\n            }\r\n            return;\r\n        }\r\n\r\n    }\r\n\r\n\r\n    //모델 로드 국룰\r\n    private Interpreter getTfliteInterpreter(String modelPath) {\r\n        try {\r\n            return new Interpreter(loadModelFile(team_play.this, modelPath));\r\n        } catch (Exception e) {\r\n            e.printStackTrace();\r\n        }\r\n        return null;\r\n    }\r\n\r\n    private MappedByteBuffer loadModelFile(Activity activity, String modelPath) throws IOException {\r\n        AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(modelPath);\r\n        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());\r\n        FileChannel fileChannel = inputStream.getChannel();\r\n        long startOffset = fileDescriptor.getStartOffset();\r\n        long declaredLength = fileDescriptor.getDeclaredLength();\r\n        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/team_play.java	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/java/com/example/squatchallenge/team_play.java	(date 1605510053351)
+@@ -66,10 +66,8 @@
+     StorageReference storageRef = storage.getReference();
+     StorageReference childRef;
+     public ImageView iv_team;
+-    public int save_index = 0;
+-    public int read_index = 0;
+-    public boolean write = false;
+-    public boolean read = false;
++    public int save_index = 0;      //업로드하는 index
++    public int read_index = 0;      //읽어오는 index
+ 
+     //카운트를 위해(시간)
+     public TextView tv_timer;
+Index: app/src/main/java/com/example/squatchallenge/Friend_list.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.squatchallenge;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\n\r\nimport com.google.android.material.appbar.CollapsingToolbarLayout;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\nimport com.google.protobuf.Any;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.appcompat.widget.Toolbar;\r\nimport androidx.recyclerview.widget.LinearLayoutManager;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\n\r\nimport android.text.Editable;\r\nimport android.view.LayoutInflater;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.ImageView;\r\nimport android.widget.TextView;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.Arrays;\r\nimport java.util.Collections;\r\nimport java.util.HashMap;\r\nimport java.util.Iterator;\r\nimport java.util.List;\r\nimport java.util.Map;\r\n\r\npublic class Friend_list extends AppCompatActivity {\r\n\r\n    private Button add_friend;\r\n    private Button add_friend_button;\r\n    private View add_friend_chang;\r\n    private TextView friends_num;\r\n    RecyclerView recyclerView;\r\n    RecyclerView.Adapter adapter;\r\n    RecyclerView.LayoutManager layoutManager;\r\n    DatabaseReference DB;\r\n    String email=\"\";\r\n    String[] friendSet = {\"친구를 추가하세요\"};\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_friend_list);\r\n        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);\r\n        setSupportActionBar(toolbar);\r\n        CollapsingToolbarLayout toolBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);\r\n        toolBarLayout.setTitle(getTitle());\r\n        Intent intent = getIntent();\r\n        email = intent.getStringExtra(\"Email\");\r\n        DB = FirebaseDatabase.getInstance().getReference(\"users\").child(email);\r\n\r\n        add_friend_chang = findViewById(R.id.add_friend_chang);\r\n        add_friend_chang.setVisibility(View.INVISIBLE);\r\n        add_friend_button = findViewById(R.id.add_friend_button);\r\n        add_friend = findViewById(R.id.add_friend);\r\n        friends_num = findViewById(R.id.friends_num);\r\n\r\n        add_friend_button.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                add_friend_chang.setVisibility(View.VISIBLE);\r\n            }\r\n        });\r\n\r\n\r\n        add_friend.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                EditText add_friend_name = findViewById(R.id.add_friend_name);\r\n                String _add_friend_name = add_friend_name.getText().toString();\r\n                newfriend(_add_friend_name);\r\n                add_friend_chang.setVisibility(View.INVISIBLE);\r\n            }\r\n        });\r\n        // recyclerview 국룰\r\n        recyclerView = findViewById(R.id.list_friend);\r\n\r\n        recyclerView.setHasFixedSize(true);\r\n\r\n        layoutManager = new LinearLayoutManager(this);\r\n        recyclerView.setLayoutManager(layoutManager);\r\n\r\n        //친구목록 구현\r\n        make_friendSet();\r\n    }\r\n\r\n    // recyclerview 국룰\r\n    public class MyAdapter_friend extends RecyclerView.Adapter<MyAdapter_friend.MyViewHolder> {\r\n        private String[] textSet ={};\r\n\r\n        public MyAdapter_friend(String[] textSet){\r\n            this.textSet = textSet;\r\n        }\r\n\r\n        public class MyViewHolder extends  RecyclerView.ViewHolder{\r\n            public TextView textView;\r\n\r\n            public MyViewHolder(View view){\r\n                super(view);\r\n                this.textView = view.findViewById(R.id.friend_name);\r\n            }\r\n        }\r\n\r\n        public MyViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {\r\n            View holderView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.friend_list, viewGroup, false);\r\n            MyViewHolder myViewHolder = new MyViewHolder(holderView);\r\n            return myViewHolder;\r\n        }\r\n\r\n        @Override\r\n        public void onBindViewHolder(MyViewHolder myViewHolder, int i) {\r\n            myViewHolder.textView.setText(this.textSet[i]);\r\n        }\r\n\r\n        @Override\r\n        public int getItemCount() {\r\n            return textSet.length;\r\n        }\r\n    }\r\n\r\n    public void newfriend(final String fname) {\r\n        DB = FirebaseDatabase.getInstance().getReference(\"users/\" + email + \"/friend_list\");\r\n        DB.addListenerForSingleValueEvent(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                boolean exist = false;\r\n                Iterator<DataSnapshot> child = snapshot.getChildren().iterator();\r\n                int friends = (int)snapshot.getChildrenCount();\r\n\r\n                // 친구 이미 있나 검사\r\n                while (child.hasNext()) {\r\n                    if (child.next().getValue().equals(fname)) {\r\n                        exist = true;\r\n                        break;\r\n                    }\r\n                }\r\n\r\n                // push로 중복넣기, 배열에 추가하고 동기화\r\n                if(!exist){\r\n                    DB.push().setValue(fname);\r\n                    friendSet[friends] = fname;\r\n                    adapter = new MyAdapter_friend(friendSet);\r\n                    recyclerView.setAdapter(adapter);\r\n                    friends_num.setText(\"친구 2 / \"+ (friends+1));\r\n                }\r\n            }\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n    }\r\n\r\n    public void make_friendSet() {\r\n\r\n        DB = FirebaseDatabase.getInstance().getReference(\"users/\" + email + \"/friend_list\");\r\n        DB.addListenerForSingleValueEvent(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                // datasnapshot 정확히 모르겠는데 걍 쓰는중\r\n                Iterator<DataSnapshot> child = snapshot.getChildren().iterator();\r\n                int friends = (int)snapshot.getChildrenCount(); // 친구수\r\n                friends_num.setText(\"친구 2 / \"+ friends);\r\n\r\n                // child 돌면서 value 가져와서 배열에 넣음\r\n                for(int i=0;i<friends;i++) {\r\n                    friendSet[i] = (String)snapshot.getValue();\r\n                    child.next();\r\n                }\r\n            }\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n        adapter = new MyAdapter_friend(friendSet);\r\n        recyclerView.setAdapter(adapter);\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/Friend_list.java	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/java/com/example/squatchallenge/Friend_list.java	(date 1605504720175)
+@@ -151,7 +151,7 @@
+                     friendSet[friends] = fname;
+                     adapter = new MyAdapter_friend(friendSet);
+                     recyclerView.setAdapter(adapter);
+-                    friends_num.setText("친구 2 / "+ (friends+1));
++                    friends_num.setText("친구 0 / "+ (friends+1));
+                 }
+             }
+             @Override
+@@ -170,7 +170,7 @@
+                 // datasnapshot 정확히 모르겠는데 걍 쓰는중
+                 Iterator<DataSnapshot> child = snapshot.getChildren().iterator();
+                 int friends = (int)snapshot.getChildrenCount(); // 친구수
+-                friends_num.setText("친구 2 / "+ friends);
++                friends_num.setText("친구 0 / "+ friends);
+ 
+                 // child 돌면서 value 가져와서 배열에 넣음
+                 for(int i=0;i<friends;i++) {
+Index: app/src/main/java/com/example/squatchallenge/MainActivity.java
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/MainActivity.java	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/java/com/example/squatchallenge/MainActivity.java	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
+@@ -1,233 +0,0 @@
+-package com.example.squatchallenge;
+-
+-import androidx.annotation.NonNull;
+-import androidx.appcompat.app.AppCompatActivity;
+-import androidx.core.content.ContextCompat;
+-import androidx.core.app.ActivityCompat;
+-
+-import android.Manifest;
+-import android.content.Intent;
+-import android.content.pm.PackageManager;
+-import android.graphics.Bitmap;
+-import android.graphics.drawable.BitmapDrawable;
+-import android.os.Build;
+-import android.os.Bundle;
+-import android.view.View;
+-import android.widget.ImageView;
+-import android.widget.LinearLayout;
+-import android.widget.TextView;
+-
+-import com.google.android.gms.tasks.OnFailureListener;
+-import com.google.android.gms.tasks.OnSuccessListener;
+-import com.google.firebase.storage.FirebaseStorage;
+-import com.google.firebase.storage.StorageReference;
+-import com.google.firebase.storage.UploadTask;
+-
+-import java.io.ByteArrayOutputStream;
+-import java.util.HashMap;
+-import java.util.Map;
+-
+-public class MainActivity extends AppCompatActivity {
+-
+-    private LinearLayout Mypage;
+-    private LinearLayout Quest;
+-    private LinearLayout friendlist;
+-    private LinearLayout Solo;
+-    private LinearLayout Random;
+-    /*private TextView quest_name1;
+-    private TextView quest_name2;
+-    private TextView quest_name3;
+-    private ImageView reroll1;
+-    private ImageView reroll2;
+-    private ImageView reroll3;
+-    private int questcnt;
+-    Map<Integer,String> questSet = new HashMap<>();
+-    quest[] today_quest = new quest[3];*/
+-
+-    //카메라 권한을 위해
+-    private int RESULT_PERMISSIONS = 100;
+-
+-    @Override
+-    protected void onCreate(Bundle savedInstanceState) {
+-        super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_main);
+-        //quest q = new quest("",0,true);
+-        //q.setTodayQuest();
+-
+-        // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
+-        requestPermissionCamera();
+-
+-        Intent intent = getIntent();
+-        final String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
+-        final String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
+-        final String email = intent.getStringExtra("Email");        //구글이메일
+-
+-        /*Quest = findViewById(R.id.Quest);
+-        questlist = findViewById(R.id.questlist);
+-        scrollview = findViewById(R.id.scrollview);
+-        Quest.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                if(questlist.getVisibility()==View.INVISIBLE) {
+-                    questlist.setVisibility(View.VISIBLE);
+-                    scrollview.setVisibility(View.INVISIBLE);
+-                }
+-                else{
+-                    questlist.setVisibility(View.INVISIBLE);
+-                    scrollview.setVisibility(View.VISIBLE);
+-                }
+-            }
+-        });
+-        reroll1 = findViewById(R.id.reroll1);
+-        reroll2 = findViewById(R.id.reroll2);
+-        reroll3 = findViewById(R.id.reroll3);
+-        reroll1.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                if(questcnt>=8) questcnt=0;
+-                quest_name1.setText(questSet.get(questcnt));
+-                reroll1.setVisibility(View.INVISIBLE);
+-                questcnt++;
+-            }
+-        });
+-        reroll2.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                if(questcnt>=8) questcnt=0;
+-                quest_name2.setText(questSet.get(questcnt));
+-                reroll2.setVisibility(View.INVISIBLE);
+-                questcnt++;
+-            }
+-        });
+-        reroll3.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                if(questcnt>=8) questcnt=0;
+-                quest_name3.setText(questSet.get(questcnt));
+-                reroll3.setVisibility(View.INVISIBLE);
+-                questcnt++;
+-            }
+-        });*/
+-
+-        friendlist = findViewById(R.id.Friendlist);
+-        friendlist.setOnClickListener(view -> {
+-            Intent intent12 = new Intent(getApplicationContext(), Friend_list.class);
+-            intent12.putExtra("Email" , email);
+-            startActivity(intent12);
+-        });
+-
+-        Mypage = findViewById(R.id.Mypage);
+-        Mypage.setOnClickListener(view -> {
+-           Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
+-           startActivity(intent1);
+-           intent1.putExtra("name" , nickName);
+-           intent1.putExtra("photoUrl",photoUrl);
+-        });
+-
+-        Solo = findViewById(R.id.Solo);
+-        Random = findViewById(R.id.Random);
+-        
+-        //솔로 플레이 버튼이 눌렸을때 (스피드모드)
+-        Solo.setOnClickListener(view -> {
+-            Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
+-            intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+-            startActivity(intent14);
+-        });
+-        //랜덤(협력)
+-        Random.setOnClickListener(view -> {
+-            Intent intent13 = new Intent(getApplicationContext(), team_play.class);
+-            intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
+-            startActivity(intent13);
+-        });
+-    }
+-
+-    /*public class quest{
+-        String name;
+-        int num;
+-        Boolean clear;
+-
+-        quest (){
+-            this.name="";
+-            this.num=-1;
+-            this.clear=false;
+-        }
+-
+-        quest (String q, int n, Boolean c){
+-            this.name=q;
+-            this.num=n;
+-            this.clear=c;
+-        }
+-
+-        void setTodayQuest(){
+-            setQuest();
+-            int ran = (int)(Math.random()*9);
+-            for(int i=0;i<3;i++){
+-                if(ran>=8) ran=0;
+-                else if(ran<=0) ran=0;
+-                today_quest[i]= new quest(questSet.get(ran),ran+1,false);
+-                questSet.remove(ran);
+-                ran++;
+-            }
+-            questcnt=ran;
+-            quest_name1 = findViewById(R.id.quest_name1);
+-            quest_name1.setText(today_quest[0].name);
+-            quest_name2 = findViewById(R.id.quest_name2);
+-            quest_name2.setText(today_quest[1].name);
+-            quest_name3 = findViewById(R.id.quest_name3);
+-            quest_name3.setText(today_quest[2].name);
+-        }
+-    };
+-
+-    public void setQuest(){
+-        questSet.put(1,"스쿼트 55회");
+-        questSet.put(2,"친선전 1회");
+-        questSet.put(3,"1대1 3회");
+-        questSet.put(4,"1대1 승리");
+-        questSet.put(5,"스쿼트 100회");
+-        questSet.put(6,"친구추가\n1회");
+-        questSet.put(7,"혼자하기\n3회");
+-        questSet.put(8,"랭커 영상\n1회 관전");
+-        questSet.put(0,"친선전 승리");
+-    }*/
+-
+-    //카메라라
+-    private boolean requestPermissionCamera() {
+-        int sdkVersion = Build.VERSION.SDK_INT;
+-        if(sdkVersion >= Build.VERSION_CODES.M) {
+-
+-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+-
+-                ActivityCompat.requestPermissions(MainActivity.this,
+-                        new String[]{Manifest.permission.CAMERA},
+-                        RESULT_PERMISSIONS);
+-
+-            }
+-//            else {
+-//                setInit();
+-//            }
+-        }
+-//        else{  // version 6 이하일때
+-//            setInit();
+-//            return true;
+-//        }
+-
+-        return true;
+-    }
+-    @Override
+-    public void onRequestPermissionsResult(int requestCode,
+-                                           String permissions[], int[] grantResults) {
+-
+-        if (RESULT_PERMISSIONS == requestCode) {
+-
+-            if (grantResults.length > 0
+-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+-                // 권한 허가시
+-                //setInit();
+-            } else {
+-                // 권한 거부시
+-            }
+-            return;
+-        }
+-
+-    }
+-}
+\ No newline at end of file
+Index: app/src/main/res/layout/ahcievement_scroll.xml
+===================================================================
+--- app/src/main/res/layout/ahcievement_scroll.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/res/layout/ahcievement_scroll.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
+@@ -1,14 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<androidx.recyclerview.widget.RecyclerView
+-    xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:app="http://schemas.android.com/apk/res-auto"
+-    xmlns:tools="http://schemas.android.com/tools"
+-    android:id="@+id/list_achievement"
+-    android:name="com.example.squatchallenge.ItemFragment"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    android:layout_marginLeft="16dp"
+-    android:layout_marginRight="16dp"
+-    app:layoutManager="LinearLayoutManager"
+-    android:scrollbars="vertical"
+-    tools:listitem="@layout/achievement" />
+\ No newline at end of file
+Index: app/src/main/res/layout/achievement.xml
+===================================================================
+--- app/src/main/res/layout/achievement.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/res/layout/achievement.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
+@@ -1,21 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:layout_width="match_parent"
+-    android:layout_height="wrap_content"
+-    android:orientation="horizontal">
+-
+-    <Button
+-        android:id="@+id/achievement"
+-        android:layout_width="220dp"
+-        android:layout_height="140dp"
+-        android:layout_marginLeft="15dp"
+-        android:layout_marginTop="30dp"
+-        android:layout_marginBottom="10dp"
+-        android:text="achievement"
+-        android:textSize="22sp"
+-        android:textColor="#000000"
+-        android:gravity="center_horizontal|center_vertical"
+-        android:background="@drawable/buttonshape2"
+-        android:backgroundTint="#DDDDDD">
+-    </Button> />
+-</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_main.xml
+===================================================================
+--- app/src/main/res/layout/activity_main.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/res/layout/activity_main.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
+@@ -1,170 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<androidx.constraintlayout.widget.ConstraintLayout
+-    xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:app="http://schemas.android.com/apk/res-auto"
+-    xmlns:tools="http://schemas.android.com/tools"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    android:fadingEdge="none"
+-    android:layerType="none"
+-    tools:context=".MainActivity">
+-
+-    <LinearLayout
+-        android:layout_width="match_parent"
+-        android:layout_height="match_parent"
+-        android:orientation="vertical"
+-        android:background="#575757">
+-        <ImageView
+-            android:layout_width="match_parent"
+-            android:layout_height="160dp"
+-            app:layout_constraintStart_toStartOf="parent"
+-            app:layout_constraintTop_toTopOf="parent"
+-            android:background="@drawable/name">
+-        </ImageView>
+-        <LinearLayout
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:layout_marginTop="10dp"
+-            android:orientation="vertical"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent">
+-            <LinearLayout
+-                android:id="@+id/Mypage"
+-                android:layout_width="200dp"
+-                android:layout_height="50dp"
+-                android:layout_marginTop="20dp"
+-                android:layout_gravity="center"
+-                android:background="@drawable/buttonshape3">
+-                <ImageView
+-                    android:layout_width="45dp"
+-                    android:layout_height="40dp"
+-                    android:layout_gravity="center_vertical"
+-                    android:layout_marginLeft="10dp"
+-                    app:srcCompat="@drawable/me1_1" />
+-                <TextView
+-                    android:layout_width="130dp"
+-                    android:layout_height="40dp"
+-                    android:layout_gravity="center"
+-                    android:background="@color/fui_bgGoogle"
+-                    android:fadeScrollbars="true"
+-                    android:textStyle="bold"
+-                    android:gravity="center_vertical|center_horizontal"
+-                    android:text="마 이 페 이 지"
+-                    android:backgroundTint="#575757"
+-                    android:textColor="#FFE607"
+-                    android:textSize="20sp" />
+-            </LinearLayout>
+-            <LinearLayout
+-                android:id="@+id/Quest"
+-                android:layout_width="200dp"
+-                android:layout_height="50dp"
+-                android:layout_marginTop="20dp"
+-                android:layout_gravity="center"
+-                android:background="@drawable/buttonshape3">
+-                <ImageView
+-                    android:layout_width="50dp"
+-                    android:layout_height="40dp"
+-                    android:layout_gravity="center_vertical"
+-                    android:layout_marginLeft="10dp"
+-                    app:srcCompat="@drawable/quest2_1" />
+-                <TextView
+-                    android:layout_width="130dp"
+-                    android:layout_height="40dp"
+-                    android:layout_gravity="center"
+-                    android:background="#575757"
+-                    android:textStyle="bold"
+-                    android:textColor="#FFE607"
+-                    android:gravity="center_vertical|center_horizontal"
+-                    android:text="퀘 스 트"
+-                    android:textSize="20sp" />
+-            </LinearLayout>
+-            <LinearLayout
+-                android:id="@+id/Friendlist"
+-                android:layout_width="200dp"
+-                android:layout_height="50dp"
+-                android:layout_marginTop="20dp"
+-                android:layout_gravity="center"
+-                android:background="@drawable/buttonshape3">
+-                <ImageView
+-                    android:layout_width="45dp"
+-                    android:layout_height="40dp"
+-                    android:layout_gravity="center_vertical"
+-                    android:layout_marginLeft="10dp"
+-                    app:srcCompat="@drawable/friends1_1" />
+-                <TextView
+-                    android:layout_width="130dp"
+-                    android:layout_height="40dp"
+-                    android:layout_gravity="center_vertical"
+-                    android:background="#575757"
+-                    android:textStyle="bold"
+-                    android:textColor="#FFE607"
+-                    android:gravity="center_vertical|center_horizontal"
+-                    android:text="친 구 목 록"
+-                    android:textSize="20sp" />
+-            </LinearLayout>
+-        </LinearLayout>
+-        <LinearLayout
+-            android:layout_width="match_parent"
+-            android:layout_height="200dp"
+-            android:layout_marginTop="20dp"
+-            android:orientation="horizontal"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent">
+-            <LinearLayout
+-                android:layout_width="match_parent"
+-                android:layout_height="wrap_content"
+-                android:id="@+id/Solo"
+-                android:layout_weight="1"
+-                android:paddingLeft="7dp"
+-                android:paddingBottom="10dp"
+-                android:paddingRight="7dp"
+-                android:orientation="vertical"
+-                android:layout_marginLeft="10dp"
+-                android:background="@drawable/buttonshape3">
+-                <TextView
+-                    android:layout_width="match_parent"
+-                    android:layout_height="wrap_content"
+-                    android:textStyle="bold"
+-                    android:layout_marginTop="5dp"
+-                    android:text="S O L O"
+-                    android:textColor="#FFE607"
+-                    android:gravity="center_horizontal"
+-                    android:textSize="24sp"/>
+-                <ImageView
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="wrap_content"
+-                    android:layout_marginTop="5dp"
+-                    android:layout_gravity="center_horizontal|center_vertical"
+-                    android:background="@drawable/squat1_2"/>
+-            </LinearLayout>
+-            <LinearLayout
+-                android:layout_width="match_parent"
+-                android:layout_height="wrap_content"
+-                android:id="@+id/Random"
+-                android:paddingLeft="7dp"
+-                android:paddingBottom="10dp"
+-                android:paddingRight="7dp"
+-                android:layout_weight="1"
+-                android:orientation="vertical"
+-                android:layout_marginLeft="10dp"
+-                android:background="@drawable/buttonshape3">
+-                <TextView
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="wrap_content"
+-                    android:textStyle="bold"
+-                    android:layout_gravity="center"
+-                    android:layout_marginTop="5dp"
+-                    android:text="@string/cooperate"
+-                    android:textColor="#FFE607"
+-                    android:gravity="center"
+-                    android:textSize="24sp"/>
+-                <ImageView
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="match_parent"
+-                    android:layout_marginTop="5dp"
+-                    android:layout_gravity="center_horizontal|center_vertical"
+-                    android:background="@drawable/squat2_2" />
+-            </LinearLayout>
+-        </LinearLayout>
+-    </LinearLayout>
+-</androidx.constraintlayout.widget.ConstraintLayout>
+Index: app/src/main/java/com/example/squatchallenge/Mypage.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.squatchallenge;\r\n\r\nimport android.content.Intent;\r\nimport android.graphics.drawable.Drawable;\r\nimport android.os.Bundle;\r\n\r\nimport com.google.android.material.floatingactionbutton.FloatingActionButton;\r\nimport com.google.android.material.snackbar.Snackbar;\r\nimport com.bumptech.glide.Glide;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.appcompat.widget.Toolbar;\r\n\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.ImageButton;\r\nimport android.widget.ImageView;\r\nimport android.widget.LinearLayout;\r\nimport android.widget.TextView;\r\n\r\npublic class Mypage extends AppCompatActivity {\r\n    private LinearLayout achiv;\r\n    private LinearLayout to_setting;\r\n    private LinearLayout to_cuscen;\r\n    private Button ach1;\r\n    private Button ach2;\r\n    private Button ach3;\r\n    private Button rec1;\r\n    private Button rec2;\r\n    private Button rec3;\r\n    private TextView tv_name;\r\n    private TextView tv_myach;\r\n    private ImageView iv_profile;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_mypage);\r\n        Toolbar toolbar = findViewById(R.id.toolbar);\r\n        setSupportActionBar(toolbar);\r\n\r\n        Intent intent = getIntent();\r\n        final String nickName = intent.getStringExtra(\"name\");\r\n        final String photoUrl = intent.getStringExtra(\"photoUrl\");\r\n        tv_name = findViewById(R.id.tv_name);\r\n        tv_name.setText(nickName);\r\n        tv_myach = findViewById(R.id.tv_myach);\r\n\r\n        iv_profile = findViewById(R.id.iv_profile);\r\n        Glide.with(this).load(photoUrl).into(iv_profile);\r\n\r\n        ach1 = findViewById(R.id.ach1);\r\n        ach2 = findViewById(R.id.ach2);\r\n        ach3 = findViewById(R.id.ach3);\r\n        ach1.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                select_myach(ach1);\r\n            }\r\n        });\r\n        ach2.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                select_myach(ach2);\r\n            }\r\n        });\r\n        ach3.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                select_myach(ach3);\r\n            }\r\n        });\r\n    }\r\n\r\n    public void select_myach(Button button){\r\n        button.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                if(button.getTextScaleX()==1.05){\r\n                    button.setTextColor(0xAAFFE607);\r\n                    button.setBackgroundColor(0xAA575757);\r\n                    button.setScaleX(1);\r\n                }\r\n                else {\r\n                    button.setTextColor(0xAA575757);\r\n                    button.setBackgroundColor(0xAAFFE607);\r\n                    tv_myach.setText(button.getText());\r\n                    button.setScaleX((float) 1.05);\r\n                }\r\n            }\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/Mypage.java	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/java/com/example/squatchallenge/Mypage.java	(date 1605504792550)
+@@ -1,27 +1,27 @@
+ package com.example.squatchallenge;
+ 
+ import android.content.Intent;
+-import android.graphics.drawable.Drawable;
+ import android.os.Bundle;
+ 
+-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+-import com.google.android.material.snackbar.Snackbar;
+ import com.bumptech.glide.Glide;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
++import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.FirebaseDatabase;
++import com.google.firebase.database.ValueEventListener;
+ 
++import androidx.annotation.NonNull;
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.appcompat.widget.Toolbar;
+ 
+-import android.view.View;
+ import android.widget.Button;
+-import android.widget.ImageButton;
+ import android.widget.ImageView;
+ import android.widget.LinearLayout;
+ import android.widget.TextView;
+ 
+ public class Mypage extends AppCompatActivity {
+-    private LinearLayout achiv;
+     private LinearLayout to_setting;
+-    private LinearLayout to_cuscen;
++    private ImageView to_cuscen;
+     private Button ach1;
+     private Button ach2;
+     private Button ach3;
+@@ -31,6 +31,7 @@
+     private TextView tv_name;
+     private TextView tv_myach;
+     private ImageView iv_profile;
++    DatabaseReference DB;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -42,6 +43,8 @@
+         Intent intent = getIntent();
+         final String nickName = intent.getStringExtra("name");
+         final String photoUrl = intent.getStringExtra("photoUrl");
++        final String email = intent.getStringExtra("Email");
++
+         tv_name = findViewById(R.id.tv_name);
+         tv_name.setText(nickName);
+         tv_myach = findViewById(R.id.tv_myach);
+@@ -52,41 +55,103 @@
+         ach1 = findViewById(R.id.ach1);
+         ach2 = findViewById(R.id.ach2);
+         ach3 = findViewById(R.id.ach3);
+-        ach1.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                select_myach(ach1);
+-            }
+-        });
+-        ach2.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                select_myach(ach2);
+-            }
++        ach1.setOnClickListener(view -> select_myach(ach1));
++        ach2.setOnClickListener(view -> select_myach(ach2));
++        ach3.setOnClickListener(view -> select_myach(ach3));
++
++        rec1 = findViewById(R.id.rec1);
++        rec2 = findViewById(R.id.rec2);
++        rec3 = findViewById(R.id.rec3);
++        rec1.setOnClickListener(view -> { // 각 기록 누르면 db가서 값 가져옴
++            DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/total_count");
++            DB.addListenerForSingleValueEvent(new ValueEventListener() {
++                @Override
++                public void onDataChange(@NonNull DataSnapshot snapshot) {
++                    long c = (long) snapshot.getValue();
++                    String cnt = c + "개";
++                    rec1.setText(cnt);
++                }
++                @Override
++                public void onCancelled(@NonNull DatabaseError error) {
++                }
++            });
+         });
+-        ach3.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                select_myach(ach3);
+-            }
+-        });
+-    }
+-
+-    public void select_myach(Button button){
+-        button.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                if(button.getTextScaleX()==1.05){
+-                    button.setTextColor(0xAAFFE607);
+-                    button.setBackgroundColor(0xAA575757);
+-                    button.setScaleX(1);
++        rec2.setOnClickListener(view -> {
++            DB = FirebaseDatabase.getInstance().getReference("users/" + email + "/speed_time");
++            DB.addListenerForSingleValueEvent(new ValueEventListener() {
++                @Override
++                public void onDataChange(@NonNull DataSnapshot snapshot) {
++                    long t = (long) snapshot.getValue();
++                    String time = t + "초";
++                    rec2.setText(time);
++                }
++                @Override
++                public void onCancelled(@NonNull DatabaseError error) {
+                 }
+-                else {
+-                    button.setTextColor(0xAA575757);
+-                    button.setBackgroundColor(0xAAFFE607);
+-                    tv_myach.setText(button.getText());
+-                    button.setScaleX((float) 1.05);
+-                }
++            });
++        });
++        rec3.setOnClickListener(view -> {
++            String stage;
++            stage = "스테이지\n3";
++            rec3.setText(stage);
++        });
++
++        to_setting.findViewById(R.id.to_setting);
++        to_setting.setOnClickListener(view -> { // 원래 설정으로 이동해야 되는데 지금 친구목록으로 해둠
++            Intent intent1 = new Intent(getApplicationContext(), Friend_list.class);
++            startActivity(intent1);
++            intent1.putExtra("name" , nickName);
++            intent1.putExtra("photoUrl",photoUrl);
++            intent1.putExtra("Email",email);
++        });
++
++        to_cuscen.findViewById(R.id.to_cuscen);
++        to_cuscen.setOnClickListener(view -> { // 원래 고객센터 팝업인데 지금 스테이지로 해둠
++            Intent intent1 = new Intent(getApplicationContext(), stage1.class);
++            startActivity(intent1);
++            intent1.putExtra("name" , nickName);
++            intent1.putExtra("photoUrl",photoUrl);
++            intent1.putExtra("Email",email);
++        });
++    }
++
++    public void select_myach(Button button){ // 업적 눌렀을때 눌린 버튼만 강조 및 내 업적으로 설정
++        button.setOnClickListener(view -> { // 나머지는 평범하게
++            if(button == findViewById(R.id.ach1)) {
++                button.setTextColor(0xAA575757);
++                button.setBackgroundColor(0xAAFFE607);
++                tv_myach.setText(button.getText());
++                button.setBackgroundResource(R.drawable.buttonshape4);
++                ach2.setTextColor(0xAAFFE607);
++                ach2.setBackgroundColor(0xAA575757);
++                ach2.setBackgroundResource(R.drawable.buttonshape3);
++                ach3.setTextColor(0xAAFFE607);
++                ach3.setBackgroundColor(0xAA575757);
++                ach3.setBackgroundResource(R.drawable.buttonshape3);
++            }
++            else if(button == findViewById(R.id.ach2)) {
++                button.setTextColor(0xAA575757);
++                button.setBackgroundColor(0xAAFFE607);
++                tv_myach.setText(button.getText());
++                button.setBackgroundResource(R.drawable.buttonshape4);
++                ach1.setTextColor(0xAAFFE607);
++                ach1.setBackgroundColor(0xAA575757);
++                ach1.setBackgroundResource(R.drawable.buttonshape3);
++                ach3.setTextColor(0xAAFFE607);
++                ach3.setBackgroundColor(0xAA575757);
++                ach3.setBackgroundResource(R.drawable.buttonshape3);
++            }
++            else {
++                button.setTextColor(0xAA575757);
++                button.setBackgroundColor(0xAAFFE607);
++                tv_myach.setText(button.getText());
++                button.setBackgroundResource(R.drawable.buttonshape4);
++                ach1.setTextColor(0xAAFFE607);
++                ach1.setBackgroundColor(0xAA575757);
++                ach1.setBackgroundResource(R.drawable.buttonshape3);
++                ach2.setTextColor(0xAAFFE607);
++                ach2.setBackgroundColor(0xAA575757);
++                ach2.setBackgroundResource(R.drawable.buttonshape3);
+             }
+         });
+     }
+Index: app/src/main/res/layout/activity_main2.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_main2.xml	(date 1605508354172)
++++ app/src/main/res/layout/activity_main2.xml	(date 1605508354172)
+@@ -0,0 +1,185 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    tools:context=".MainActivity2">
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:background="#575757">
++        <ImageView
++            android:layout_width="match_parent"
++            android:layout_height="160dp"
++            app:layout_constraintStart_toStartOf="parent"
++            app:layout_constraintTop_toTopOf="parent"
++            android:background="@drawable/name">
++        </ImageView>
++        <FrameLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:padding="10dp"
++            android:layout_gravity="center">
++            <include
++                android:id="@+id/questlist"
++                layout="@layout/activity_quest_list"
++                android:layout_centerInParent="true"
++                android:visibility="invisible"
++                android:layout_height="wrap_content"
++                android:layout_width="wrap_content" />
++            <LinearLayout
++                android:id="@+id/main_linear"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="10dp"
++                android:orientation="vertical"
++                app:layout_constraintEnd_toEndOf="parent"
++                app:layout_constraintStart_toStartOf="parent">
++                <LinearLayout
++                    android:orientation="horizontal"
++                    android:id="@+id/My_page"
++                    android:layout_width="200dp"
++                    android:layout_height="50dp"
++                    android:layout_marginTop="20dp"
++                    android:layout_gravity="center"
++                    android:background="@drawable/buttonshape3">
++                    <ImageView
++                        android:layout_width="45dp"
++                        android:layout_height="40dp"
++                        android:layout_gravity="center_vertical"
++                        android:layout_marginLeft="10dp"
++                        app:srcCompat="@drawable/me1_1" />
++                    <TextView
++                        android:layout_width="130dp"
++                        android:layout_height="40dp"
++                        android:layout_gravity="center"
++                        android:fadeScrollbars="true"
++                        android:textStyle="bold"
++                        android:gravity="center_vertical|center_horizontal"
++                        android:text="마 이 페 이 지"
++                        android:background="#575757"
++                        android:textColor="#FFE607"
++                        android:textSize="20sp" />
++                </LinearLayout>
++                <LinearLayout
++                    android:id="@+id/Quest"
++                    android:orientation="horizontal"
++                    android:layout_width="200dp"
++                    android:layout_height="50dp"
++                    android:layout_marginTop="20dp"
++                    android:layout_gravity="center"
++                    android:background="@drawable/buttonshape3">
++                    <ImageView
++                        android:layout_width="50dp"
++                        android:layout_height="40dp"
++                        android:layout_gravity="center_vertical"
++                        android:layout_marginLeft="10dp"
++                        app:srcCompat="@drawable/quest2_1" />
++
++                    <TextView
++                        android:layout_width="133dp"
++                        android:layout_height="wrap_content"
++                        android:layout_gravity="center"
++                        android:background="#575757"
++                        android:gravity="center_vertical|center_horizontal"
++                        android:text="퀘 스 트"
++                        android:textColor="#FFE607"
++                        android:textSize="20sp"
++                        android:textStyle="bold" />
++                </LinearLayout>
++                <LinearLayout
++                    android:id="@+id/Friendlist"
++                    android:orientation="horizontal"
++                    android:layout_width="200dp"
++                    android:layout_height="50dp"
++                    android:layout_marginTop="20dp"
++                    android:layout_gravity="center"
++                    android:background="@drawable/buttonshape3">
++                    <ImageView
++                        android:layout_width="45dp"
++                        android:layout_height="40dp"
++                        android:layout_gravity="center_vertical"
++                        android:layout_marginLeft="10dp"
++                        app:srcCompat="@drawable/friends1_1" />
++                    <TextView
++                        android:layout_width="130dp"
++                        android:layout_height="40dp"
++                        android:layout_gravity="center_vertical"
++                        android:background="#575757"
++                        android:textStyle="bold"
++                        android:textColor="#FFE607"
++                        android:gravity="center_vertical|center_horizontal"
++                        android:text="친 구 목 록"
++                        android:textSize="20sp" />
++                </LinearLayout>
++            </LinearLayout>
++        </FrameLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="200dp"
++            android:layout_marginTop="20dp"
++            android:orientation="horizontal"
++            app:layout_constraintEnd_toEndOf="parent"
++            app:layout_constraintStart_toStartOf="parent">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:id="@+id/Solo"
++                android:layout_weight="1"
++                android:paddingLeft="7dp"
++                android:paddingBottom="10dp"
++                android:paddingRight="7dp"
++                android:orientation="vertical"
++                android:layout_marginLeft="10dp"
++                android:background="@drawable/buttonshape3">
++                <TextView
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:textStyle="bold"
++                    android:layout_marginTop="5dp"
++                    android:text="S O L O"
++                    android:fontFamily="@font/kanit_black"
++                    android:textColor="#FFE607"
++                    android:gravity="center_horizontal"
++                    android:textSize="26sp"/>
++                <ImageView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="5dp"
++                    android:layout_gravity="center_horizontal|center_vertical"
++                    android:background="@drawable/squat1_2"/>
++            </LinearLayout>
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:id="@+id/Random"
++                android:paddingLeft="7dp"
++                android:paddingBottom="10dp"
++                android:paddingRight="7dp"
++                android:layout_weight="1"
++                android:orientation="vertical"
++                android:layout_marginLeft="10dp"
++                android:background="@drawable/buttonshape3">
++                <TextView
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:textStyle="bold"
++                    android:layout_gravity="center"
++                    android:layout_marginTop="5dp"
++                    android:text="@string/cooperate"
++                    android:fontFamily="@font/kanit_black"
++                    android:textColor="#FFE607"
++                    android:gravity="center"
++                    android:textSize="26sp"/>
++                <ImageView
++                    android:layout_width="wrap_content"
++                    android:layout_height="match_parent"
++                    android:layout_marginTop="5dp"
++                    android:layout_gravity="center_horizontal|center_vertical"
++                    android:background="@drawable/squat2_2" />
++            </LinearLayout>
++        </LinearLayout>
++    </LinearLayout>
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/res/font-v26/font.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/font-v26/font.xml	(date 1605506691176)
++++ app/src/main/res/font-v26/font.xml	(date 1605506691176)
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<font-family xmlns:android="http://schemas.android.com/apk/res/android">
++
++    <font android:font="@font/kanit_black" android:fontWeight="400" android:fontStyle="normal"/>
++    <font android:font="@font/kanit_bold" android:fontWeight="400" android:fontStyle="normal"/>
++    <font android:font="@font/kanit_medium" android:fontWeight="400" android:fontStyle="normal"/>
++    <font android:font="@font/kanit_semibold" android:fontWeight="400" android:fontStyle="normal"/>
++    <font android:font="@font/kanit_regular" android:fontWeight="400" android:fontStyle="normal"/>
++</font-family>
+\ No newline at end of file
+Index: app/src/main/java/com/example/squatchallenge/MainActivity2.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/MainActivity2.java	(date 1605508430427)
++++ app/src/main/java/com/example/squatchallenge/MainActivity2.java	(date 1605508430427)
+@@ -0,0 +1,215 @@
++package com.example.squatchallenge;
++
++import androidx.appcompat.app.AppCompatActivity;
++import androidx.core.app.ActivityCompat;
++import androidx.core.content.ContextCompat;
++
++import android.Manifest;
++import android.content.Intent;
++import android.content.pm.PackageManager;
++import android.os.Build;
++import android.os.Bundle;
++import android.view.View;
++import android.widget.ImageView;
++import android.widget.LinearLayout;
++import android.widget.TextView;
++
++import java.util.HashMap;
++import java.util.Map;
++
++public class MainActivity2 extends AppCompatActivity {
++
++    private TextView quest_name1;
++    private TextView quest_name2;
++    private TextView quest_name3;
++    private ImageView reroll1;
++    private ImageView reroll2;
++    private ImageView reroll3;
++    private int questcnt;
++    Map<Integer,String> questSet = new HashMap<>();
++    MainActivity2.quest[] today_quest = new MainActivity2.quest[3];
++
++    //카메라 권한을 위해
++    private int RESULT_PERMISSIONS = 100;
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_main2);
++        //setContentView(R.layout.activity_quest_list);
++        MainActivity2.quest q = new MainActivity2.quest("",0,true);
++        q.setTodayQuest();
++
++        // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
++        requestPermissionCamera();
++
++        Intent intent = getIntent();
++        final String nickName = intent.getStringExtra("name");        //loginactivity로부터 닉네임 전달받음
++        final String photoUrl = intent.getStringExtra("photoUrl");        //loginactivity로부터 프로필사진 Url전달받음
++        final String email = intent.getStringExtra("Email");        //구글이메일
++
++        LinearLayout Quest = findViewById(R.id.Quest);
++        LinearLayout questlist = findViewById(R.id.questlist);
++        LinearLayout main_linear = findViewById(R.id.main_linear);
++
++        Quest.setOnClickListener(view -> { // 퀘스트 누르면 위로 오버랩되게 처리
++            questlist.setVisibility(View.VISIBLE);
++            main_linear.setVisibility(View.INVISIBLE);
++        });
++        questlist.setOnClickListener(view -> {
++            questlist.setVisibility(View.INVISIBLE);
++            main_linear.setVisibility(View.VISIBLE);
++        });
++
++        reroll1 = findViewById(R.id.reroll1);
++        reroll2 = findViewById(R.id.reroll2);
++        reroll3 = findViewById(R.id.reroll3);
++        reroll1.setOnClickListener(view -> reroll(reroll1));
++        reroll2.setOnClickListener(view -> reroll(reroll2));
++        reroll3.setOnClickListener(view -> reroll(reroll3));
++
++        LinearLayout friendlist = findViewById(R.id.Friendlist); // 친구목록으로
++        friendlist.setOnClickListener(view -> {
++            Intent intent12 = new Intent(getApplicationContext(), Friend_list.class);
++            intent12.putExtra("Email" , email);
++            startActivity(intent12);
++        });
++
++        LinearLayout my_page = findViewById(R.id.My_page); // 마이페이지로
++        my_page.setOnClickListener(view -> {
++            Intent intent1 = new Intent(getApplicationContext(), Mypage.class);
++            startActivity(intent1);
++            intent1.putExtra("name" , nickName);
++            intent1.putExtra("photoUrl",photoUrl);
++            intent1.putExtra("Email",email);
++        });
++
++        LinearLayout solo = findViewById(R.id.Solo);
++        LinearLayout random = findViewById(R.id.Random);
++
++        //솔로 플레이 버튼이 눌렸을때 (스피드모드)
++        solo.setOnClickListener(view -> {
++            Intent intent14 = new Intent(getApplicationContext(), solo_speed_play.class);
++            intent14.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
++            startActivity(intent14);
++        });
++        //랜덤(협력)
++        random.setOnClickListener(view -> {
++            Intent intent13 = new Intent(getApplicationContext(), team_play.class);
++            intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
++            startActivity(intent13);
++        });
++    }
++
++    public class quest{
++        String name;
++        int num;
++        Boolean clear;
++
++        quest (){
++            this.name="";
++            this.num=-1;
++            this.clear=false;
++        }
++
++        quest (String q, int n, Boolean c){
++            this.name=q;
++            this.num=n;
++            this.clear=c;
++        }
++
++        void setTodayQuest(){ // 퀘스트 랜덤하게 선정
++            setQuest();
++            int ran = (int)(Math.random()*9);
++            for(int i=0;i<3;i++){
++                if(ran>=8) ran=0;
++                else if(ran<=0) ran=0;
++                today_quest[i]= new MainActivity2.quest(questSet.get(ran),ran+1,false);
++                questSet.remove(ran);
++                ran++;
++            }
++            questcnt=ran;
++            quest_name1 = findViewById(R.id.quest_name1);
++            quest_name1.setText(today_quest[0].name);
++            quest_name2 = findViewById(R.id.quest_name2);
++            quest_name2.setText(today_quest[1].name);
++            quest_name3 = findViewById(R.id.quest_name3);
++            quest_name3.setText(today_quest[2].name);
++        }
++    };
++
++    public void setQuest(){
++        questSet.put(1,"스쿼트 55회");
++        questSet.put(2,"친선전 1회");
++        questSet.put(3,"1대1 3회");
++        questSet.put(4,"1대1 승리");
++        questSet.put(5,"스쿼트 100회");
++        questSet.put(6,"친구추가\n1회");
++        questSet.put(7,"혼자하기\n3회");
++        questSet.put(8,"랭커 영상\n1회 관전");
++        questSet.put(0,"친선전 승리");
++    }
++
++    public void reroll(ImageView imageView){ // 리롤하면 버튼 사라지고 퀘스트 교체
++        imageView.setOnClickListener(view -> {
++            if(imageView == findViewById(R.id.reroll1)) {
++                if(questcnt>=8) questcnt=0;
++                quest_name1.setText(questSet.get(questcnt));
++                reroll1.setVisibility(View.INVISIBLE);
++                questcnt++;
++            }
++            else if(imageView == findViewById(R.id.reroll2)) {
++                if(questcnt>=8) questcnt=0;
++                quest_name2.setText(questSet.get(questcnt));
++                reroll2.setVisibility(View.INVISIBLE);
++                questcnt++;
++            }
++            else {
++                if(questcnt>=8) questcnt=0;
++                quest_name3.setText(questSet.get(questcnt));
++                reroll3.setVisibility(View.INVISIBLE);
++                questcnt++;
++            }
++        });
++    }
++
++    //카메라라
++    private boolean requestPermissionCamera() {
++        int sdkVersion = Build.VERSION.SDK_INT;
++        if(sdkVersion >= Build.VERSION_CODES.M) {
++
++            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
++
++                ActivityCompat.requestPermissions(MainActivity2.this,
++                        new String[]{Manifest.permission.CAMERA},
++                        RESULT_PERMISSIONS);
++
++            }
++//            else {
++//                setInit();
++//            }
++        }
++//        else{  // version 6 이하일때
++//            setInit();
++//            return true;
++//        }
++
++        return true;
++    }
++    @Override
++    public void onRequestPermissionsResult(int requestCode,
++                                           String permissions[], int[] grantResults) {
++
++        if (RESULT_PERMISSIONS == requestCode) {
++
++            if (grantResults.length > 0
++                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
++                // 권한 허가시
++                //setInit();
++            } else {
++                // 권한 거부시
++            }
++            return;
++        }
++    }
++}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_stage2.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_stage2.xml	(date 1605505139620)
++++ app/src/main/res/layout/activity_stage2.xml	(date 1605505139620)
+@@ -0,0 +1,206 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    tools:context=".stage2">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:background="#575757"
++        android:weightSum="1">
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line1"/>
++            <ImageView
++                android:id="@+id/upto_stage3"
++                android:layout_width="0dp"
++                android:layout_height="match_parent"
++                android:layout_weight=".25"
++                android:background="@drawable/up1"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_img6"/>
++            <TextView
++                android:id="@+id/stage2"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="6"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginRight="5dp"
++                android:layout_gravity="center"/>
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_gravity="center"
++                android:layout_weight=".25"
++                android:layout_marginRight="15dp"
++                android:background="@drawable/buttonshape3"
++                android:gravity="center"
++                android:padding="5dp"
++                android:text="2분안에\n스쿼트\n50회"
++                android:textColor="#FFE607"
++                android:textSize="22sp"/>
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line2"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:text="2분안에\n스쿼트\n40회"
++                android:textSize="22sp"
++                android:padding="5dp"
++                android:gravity="center"
++                android:layout_marginLeft="15dp"
++                android:textColor="#FFE607"
++                android:layout_gravity="center"
++                android:background="@drawable/buttonshape3"
++                android:layout_weight=".25"/>
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="5"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginLeft="5dp"
++                android:layout_gravity="center"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_img5"/>
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line1"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:padding="20dp"
++                android:background="@drawable/stage_img4"/>
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="4"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginRight="5dp"
++                android:layout_gravity="center"/>
++            <TextView
++                android:id="@+id/stage2_text"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_gravity="center"
++                android:layout_weight=".25"
++                android:layout_marginRight="15dp"
++                android:background="@drawable/buttonshape3"
++                android:gravity="center"
++                android:padding="5dp"
++                android:text="1분안에\n스쿼트\n20회"
++                android:textColor="#FFE607"
++                android:textSize="22sp" />
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".13"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line2"/>
++            <ImageView
++                android:id="@+id/downto_stage1"
++                android:layout_width="0dp"
++                android:layout_height="match_parent"
++                android:layout_weight=".25"
++                android:background="@drawable/down1"/>
++        </LinearLayout>
++    </LinearLayout>
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    package=\"com.example.squatchallenge\">\r\n\r\n    <uses-permission android:name=\"android.permission.CAMERA\" />\r\n\r\n    <uses-feature android:name=\"android.hardware.camera\" />\r\n\r\n    <uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />\r\n    <uses-permission android:name=\"android.permission.RECORD_AUDIO\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n\r\n    <uses-feature android:name=\"android.hardware.location.gps\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/AppTheme\">\r\n        <activity android:name=\".team_play\"></activity>\r\n        <activity android:name=\".solo_speed_play\" />\r\n        <activity\r\n            android:name=\".Mypage\"\r\n            android:label=\"@string/title_activity_mypage\"\r\n            android:theme=\"@style/AppTheme.NoActionBar\" />\r\n        <activity\r\n            android:name=\".Friend_list\"\r\n            android:label=\"@string/title_activity_friend_list\"\r\n            android:theme=\"@style/AppTheme.NoActionBar\" />\r\n        <activity android:name=\".MainActivity\" />\r\n        <activity android:name=\".LoginActivity\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision 1bb85392327622a87d3924e56cd9f0fbbef85061)
++++ app/src/main/AndroidManifest.xml	(date 1605506729045)
+@@ -19,7 +19,8 @@
+         android:roundIcon="@mipmap/ic_launcher_round"
+         android:supportsRtl="true"
+         android:theme="@style/AppTheme">
+-        <activity android:name=".team_play"></activity>
++        <activity android:name=".MainActivity2"></activity>
++        <activity android:name=".team_play" />
+         <activity android:name=".solo_speed_play" />
+         <activity
+             android:name=".Mypage"
+Index: app/src/main/java/com/example/squatchallenge/stage1.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/stage1.java	(date 1605505286412)
++++ app/src/main/java/com/example/squatchallenge/stage1.java	(date 1605505286412)
+@@ -0,0 +1,36 @@
++package com.example.squatchallenge;
++
++import androidx.appcompat.app.AppCompatActivity;
++
++import android.content.Intent;
++import android.os.Bundle;
++import android.widget.ImageView;
++import android.widget.LinearLayout;
++import android.widget.TextView;
++
++import org.w3c.dom.Text;
++
++public class stage1 extends AppCompatActivity {
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_stage1);
++
++        ImageView upto_stage2 = findViewById(R.id.upto_stage2); // 화살표로 페이지 이동
++        upto_stage2.setOnClickListener(view -> {
++            Intent intent12 = new Intent(getApplicationContext(), stage2.class);
++            startActivity(intent12);
++        });
++
++        TextView stage1 = findViewById(R.id.stage1);
++        stage1.setOnClickListener(view -> {
++            stage_clear(stage1);
++        });
++    }
++
++    public void stage_clear(TextView textview){
++        textview.setBackgroundResource(R.drawable.check1);
++        textview.setText("");
++    }
++}
+Index: app/src/main/res/layout/activity_stage3.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_stage3.xml	(date 1605505164497)
++++ app/src/main/res/layout/activity_stage3.xml	(date 1605505164497)
+@@ -0,0 +1,195 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    tools:context=".stage3">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:background="#575757"
++        android:weightSum="1">
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".08">
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:text="5분안에\n스쿼트\n130회"
++                android:textSize="22sp"
++                android:padding="5dp"
++                android:gravity="center"
++                android:layout_marginLeft="15dp"
++                android:textColor="#FFE607"
++                android:layout_gravity="center"
++                android:background="@drawable/buttonshape3"
++                android:layout_weight=".25"/>
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_marginLeft="5dp"
++                android:text="9"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_weight=".25"
++                android:layout_gravity="center"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:padding="40dp"
++                android:background="@drawable/stage_img7"/>
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line1"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_img9"
++                android:padding="20dp"/>
++            <TextView
++                android:id="@+id/stage8"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="8"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginRight="5dp"
++                android:layout_gravity="center"
++                app:layout_constraintEnd_toStartOf="@id/stage2_text"/>
++            <TextView
++                android:id="@+id/stage2_text"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_gravity="center"
++                android:layout_weight=".25"
++                android:layout_marginRight="15dp"
++                android:background="@drawable/buttonshape3"
++                android:gravity="center"
++                android:padding="5dp"
++                android:text="3분안에\n스쿼트\n90회"
++                android:textColor="#FFE607"
++                android:textSize="22sp"
++                app:layout_constraintEnd_toEndOf="parent" />
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line2"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:text="3분안에\n스쿼트\n80회"
++                android:textSize="22sp"
++                android:padding="5dp"
++                android:gravity="center"
++                android:layout_marginLeft="15dp"
++                android:textColor="#FFE607"
++                android:layout_gravity="center"
++                android:background="@drawable/buttonshape3"
++                android:layout_weight=".25"/>
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="7"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginLeft="5dp"
++                android:layout_gravity="center"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:padding="40dp"
++                android:background="@drawable/stage_img8"/>
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line1"/>
++            <ImageView
++                android:id="@+id/downto_stage2"
++                android:layout_width="0dp"
++                android:layout_height="match_parent"
++                android:layout_weight=".25"
++                android:background="@drawable/down1"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".05">
++        </LinearLayout>
++    </LinearLayout>
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/squatchallenge/stage2.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/stage2.java	(date 1605505271828)
++++ app/src/main/java/com/example/squatchallenge/stage2.java	(date 1605505271828)
+@@ -0,0 +1,28 @@
++package com.example.squatchallenge;
++
++import android.content.Intent;
++import android.os.Bundle;
++import android.widget.ImageView;
++
++import androidx.appcompat.app.AppCompatActivity;
++
++public class stage2 extends AppCompatActivity {
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_stage2);
++
++        ImageView upto_stage3 = findViewById(R.id.upto_stage3); // 화살표로 페이지 이동
++        upto_stage3.setOnClickListener(view -> {
++            Intent intent12 = new Intent(getApplicationContext(), stage3.class);
++            startActivity(intent12);
++        });
++
++        ImageView downto_stage1 = findViewById(R.id.downto_stage1); // 화살표로 페이지 이동
++        downto_stage1.setOnClickListener(view -> {
++            Intent intent13 = new Intent(getApplicationContext(), stage1.class);
++            startActivity(intent13);
++        });
++    }
++}
+Index: app/src/main/java/com/example/squatchallenge/stage3.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/squatchallenge/stage3.java	(date 1605505262639)
++++ app/src/main/java/com/example/squatchallenge/stage3.java	(date 1605505262639)
+@@ -0,0 +1,22 @@
++package com.example.squatchallenge;
++
++import android.content.Intent;
++import android.os.Bundle;
++import android.widget.ImageView;
++
++import androidx.appcompat.app.AppCompatActivity;
++
++public class stage3 extends AppCompatActivity {
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_stage3);
++
++        ImageView downto_stage2 = findViewById(R.id.downto_stage2); // 화살표로 페이지 이동
++        downto_stage2.setOnClickListener(view -> {
++            Intent intent13 = new Intent(getApplicationContext(), stage2.class);
++            startActivity(intent13);
++        });
++    }
++}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_stage1.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_stage1.xml	(date 1605505017768)
++++ app/src/main/res/layout/activity_stage1.xml	(date 1605505017768)
+@@ -0,0 +1,195 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    tools:context=".stage1">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:background="#575757"
++        android:weightSum="1">
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".03">
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line2"/>
++            <ImageView
++                android:id="@+id/upto_stage2"
++                android:layout_width="0dp"
++                android:layout_height="match_parent"
++                android:layout_weight=".25"
++                android:background="@drawable/up1"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:text="스쿼트\n30회"
++                android:textSize="24sp"
++                android:padding="5dp"
++                android:gravity="center"
++                android:layout_marginLeft="15dp"
++                android:textColor="#FFE607"
++                android:layout_gravity="center"
++                android:background="@drawable/buttonshape3"
++                android:layout_weight=".25"/>
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_marginLeft="5dp"
++                android:text="3"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_weight=".25"
++                android:layout_gravity="center"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_img3"/>
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line1"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_img1"
++                android:padding="20dp"/>
++            <TextView
++                android:id="@+id/stage2"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="2"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginRight="5dp"
++                android:layout_gravity="center"
++                app:layout_constraintEnd_toStartOf="@id/stage2_text"/>
++            <TextView
++                android:id="@+id/stage2_text"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_gravity="center"
++                android:layout_weight=".25"
++                android:layout_marginRight="15dp"
++                android:background="@drawable/buttonshape3"
++                android:gravity="center"
++                android:padding="5dp"
++                android:text="스쿼트\n20회"
++                android:textColor="#FFE607"
++                android:textSize="24sp"
++                app:layout_constraintEnd_toEndOf="parent" />
++        </LinearLayout>
++        <LinearLayout
++            android:orientation="horizontal"
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".12"
++            android:weightSum="1">
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".25"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:background="@drawable/stage_line2"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:orientation="horizontal"
++            android:layout_weight=".17"
++            android:weightSum="1">
++            <TextView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:text="스쿼트\n10회"
++                android:textSize="24sp"
++                android:padding="5dp"
++                android:gravity="center"
++                android:layout_marginLeft="15dp"
++                android:textColor="#FFE607"
++                android:layout_gravity="center"
++                android:background="@drawable/buttonshape3"
++                android:layout_weight=".25"/>
++            <TextView
++                android:id="@+id/stage1"
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:background="@drawable/dot1_3"
++                android:layout_weight=".25"
++                android:text="1"
++                android:textSize="45sp"
++                android:fontFamily="@font/kanit_black"
++                android:gravity="center"
++                android:textColor="#FFE607"
++                android:layout_marginLeft="5dp"
++                android:layout_gravity="center"/>
++            <ImageView
++                android:layout_width="0dp"
++                android:layout_height="wrap_content"
++                android:layout_weight=".5"
++                android:padding="40dp"
++                android:background="@drawable/stage_img2"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="0dp"
++            android:layout_weight=".1">
++        </LinearLayout>
++    </LinearLayout>
++</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_quest_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_quest_list.xml	(date 1605505402674)
++++ app/src/main/res/layout/activity_quest_list.xml	(date 1605505402674)
+@@ -0,0 +1,95 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent">
++    <LinearLayout
++        android:orientation="vertical"
++        android:id="@+id/questlist"
++        android:layout_width="220dp"
++        android:layout_height="215dp"
++        android:layout_gravity="center"
++        android:layout_marginLeft="15dp"
++        android:background="@drawable/buttonshape3">
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:orientation="horizontal"
++            android:layout_marginTop="12dp">
++            <ImageView
++                android:layout_width="35dp"
++                android:layout_height="35dp"
++                android:layout_marginLeft="15dp"
++                android:background="@drawable/dot1_1"
++                android:layout_gravity="center" />
++            <TextView
++                android:id="@+id/quest_name1"
++                android:layout_width="115dp"
++                android:layout_height="55dp"
++                android:textStyle="bold"
++                android:textSize="22sp"
++                android:gravity="center"
++                android:layout_gravity="center" />
++            <ImageView
++                android:id="@+id/reroll1"
++                android:layout_width="30dp"
++                android:layout_height="30dp"
++                android:layout_marginLeft="5dp"
++                android:background="@drawable/reroll_1"
++                android:layout_gravity="center" />
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:orientation="horizontal"
++            android:layout_marginTop="15dp">
++            <ImageView
++                android:layout_width="35dp"
++                android:layout_height="35dp"
++                android:layout_marginLeft="15dp"
++                android:background="@drawable/dot1_1"
++                android:layout_gravity="center" />
++            <TextView
++                android:id="@+id/quest_name2"
++                android:layout_width="115dp"
++                android:layout_height="55dp"
++                android:textStyle="bold"
++                android:textSize="22sp"
++                android:gravity="center"
++                android:layout_gravity="center" />
++            <ImageView
++                android:id="@+id/reroll2"
++                android:layout_width="30dp"
++                android:layout_height="30dp"
++                android:layout_marginLeft="5dp"
++                android:background="@drawable/reroll_1"
++                android:layout_gravity="center" />
++        </LinearLayout>
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:orientation="horizontal"
++            android:layout_marginTop="15dp">
++            <ImageView
++                android:layout_width="35dp"
++                android:layout_height="35dp"
++                android:layout_marginLeft="15dp"
++                android:background="@drawable/dot1_1"
++                android:layout_gravity="center" />
++            <TextView
++                android:id="@+id/quest_name3"
++                android:layout_width="115dp"
++                android:layout_height="55dp"
++                android:textStyle="bold"
++                android:textSize="22sp"
++                android:gravity="center"
++                android:layout_gravity="center" />
++            <ImageView
++                android:id="@+id/reroll3"
++                android:layout_width="30dp"
++                android:layout_height="30dp"
++                android:layout_marginLeft="5dp"
++                android:background="@drawable/reroll_1"
++                android:layout_gravity="center" />
++        </LinearLayout>
++    </LinearLayout>
++</LinearLayout>
+\ No newline at end of file

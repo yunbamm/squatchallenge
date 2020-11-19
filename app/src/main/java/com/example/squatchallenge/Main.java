@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.squatchallenge.apprtc.ConnectActivity;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,7 +99,7 @@ public class Main extends AppCompatActivity {
         });
         //랜덤(협력)
         random.setOnClickListener(view -> {
-            Intent intent13 = new Intent(getApplicationContext(), team_play.class);
+            Intent intent13 = new Intent(getApplicationContext(), ConnectActivity.class);
             intent13.putExtra("Email" , email);       //우선 id만 넘겨준다 가정
             startActivity(intent13);
         });
